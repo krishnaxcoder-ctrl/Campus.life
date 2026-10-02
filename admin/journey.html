@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Journey Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --purple: #5109B5;
+    --grad-start: #667EEA;
+    --grad-end: #764BA2;
+    --text: #333333;
+    --muted: #888888;
+    --border: #EEEEEE;
+    --box: #F8F9FE;
+    --box-border: #E3E6F3;
+    --danger: #DC3545;
+    --success: #198754;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100vh;
+    font-family: 'Poppins', system-ui, sans-serif;
+    color: var(--text);
+    background: linear-gradient(135deg, var(--grad-start), var(--grad-end)) fixed;
+  }
+  [hidden] { display: none !important; }
+  button, input, select { font: inherit; }
+  button { cursor: pointer; border: none; border-radius: 8px; font-weight: 600; }
+  input, select { min-width: 0; padding: 7px 10px; border: 1.5px solid #E0E0E0; border-radius: 8px; background: #fff; color: var(--text); outline: none; }
+  input:focus, select:focus { border-color: var(--grad-start); }
+
+  .bar {
+    position: sticky; top: 0; z-index: 10;
+    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+    padding: 12px 16px; background: var(--purple); color: #fff;
+  }
+  .bar a { color: #fff; opacity: 0.85; text-decoration: none; font-size: 14px; }
+  .bar h1 { flex: 1; font-size: 18px; }
+  .bar select { max-width: 100%; }
+
+  main { max-width: 760px; margin: 0 auto; padding: 16px; }
+  .card { margin-bottom: 16px; padding: 16px; border-radius: 20px; background: #fff; }
+  .card h2 { margin-bottom: 12px; font-size: 22px; color: var(--purple); }
+
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
+  .stat { padding: 18px 8px; border-radius: 20px; background: #fff; text-align: center; }
+  .stat b { display: block; font-size: 28px; line-height: 36px; }
+  .stat span { font-size: 13px; letter-spacing: 0.4px; color: var(--muted); }
+  .hint { margin: -4px 4px 16px; font-size: 13px; line-height: 19px; color: rgba(255,255,255,0.9); }
+
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .row input[type=text], .row input:not([type]) { flex: 1 1 180px; }
+  .num { width: 64px; }
+
+  .btn { padding: 8px 14px; background: var(--purple); color: #fff; }
+  .btn-light { padding: 6px 10px; background: #EFE1FE; color: var(--purple); font-size: 12px; }
+  .btn-danger { padding: 6px 10px; background: #FDECEE; color: var(--danger); font-size: 12px; }
+
+  .item { margin-top: 14px; border: 1.5px solid var(--border); border-radius: 16px; overflow: hidden; }
+  .item-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 14px; }
+  .item-head .title { flex: 1 1 220px; font-weight: 700; font-size: 16px; }
+  .pill { padding: 2px 8px; border-radius: 10px; background: #EFE1FE; color: var(--purple); font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .dur { font-size: 14px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+  .item-body { padding: 0 14px 14px; border-top: 1px solid var(--border); }
+  .quick { margin-top: 12px; font-size: 13px; color: var(--muted); }
+
+  .checkin { margin-top: 12px; padding: 12px; border: 1px solid var(--box-border); border-radius: 14px; background: var(--box); }
+  .checkin-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .checkin-head b { font-size: 12px; letter-spacing: 0.3px; color: var(--purple); }
+  .fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+  .fields label { display: flex; flex-direction: column; gap: 3px; font-size: 11px; font-weight: 600; letter-spacing: 0.6px; color: #9E9E9E; }
+  .fields input { width: 100%; }
+  .open { color: var(--danger); }
+  .empty { padding: 20px; text-align: center; color: var(--muted); }
+
+  .login { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 16px; }
+  .login .card { width: 100%; max-width: 420px; padding: 32px; text-align: center; }
+  .login p { margin-bottom: 16px; font-size: 14px; color: var(--muted); }
+  .login input { width: 100%; margin-bottom: 12px; font-family: monospace; }
+  .login .btn { width: 100%; padding: 11px; }
+
+  #toast { position: fixed; right: 16px; bottom: 16px; z-index: 99; max-width: calc(100% - 32px); padding: 11px 18px; border-radius: 10px; color: #fff; font-size: 14px; font-weight: 600; }
+  #toast.success { background: var(--success); }
+  #toast.error { background: var(--danger); }
+</style>
+</head>
+<body>
+
+<div id="login" class="login">
+  <div class="card">
+    <h2>Journey Admin</h2>
+    <p>Enter the Supabase service role key. The app's key is read-only, so edits need this one.</p>
+    <input type="password" id="keyInput" placeholder="Service role key" />
+    <button class="btn" id="connect">Connect</button>
+  </div>
+</div>
+
+<div id="app" hidden>
+  <header class="bar">
+    <a href="index.html">&larr; All tables</a>
+    <h1>Journey Admin</h1>
+    <select id="user" aria-label="User"></select>
+  </header>
+
+  <main>
+    <section class="stats">
+      <div class="stat"><b id="total">–</b><span>TOTAL HOURS</span></div>
+      <div class="stat"><b id="count">–</b><span>ACTIVITIES</span></div>
+    </section>
+    <p class="hint">
+      Same numbers as My Volunteer Journey in the app. Total hours is the sum of finished check-ins,
+      so change it by adding hours or editing a duration. In the app, tap refresh to see changes.
+    </p>
+
+    <section class="card">
+      <h2>Your Journey</h2>
+      <form id="addActivity" class="row">
+        <input id="newTitle" list="events" placeholder="Event title, e.g. Swach Bharat_Panambur_26/09/26" />
+        <button class="btn">Add event</button>
+      </form>
+      <div id="list"></div>
+    </section>
+  </main>
+</div>
+
+<!-- Event titles from My Events in the app (src/data/cl.ts). -->
+<datalist id="events">
+  <option value="Swach Bharat_Panambur_26/09/26">
+  <option value="Swach Bharat_Panambur_29/06/26">
+  <option value="Swach Bharat_Aids 2Nd Year_Beach Cleaning _Nitk">
+  <option value="Beach Cleaning_Aids">
+  <option value="Swach Bharat_Aids">
+</datalist>
+
+<div id="toast" hidden></div>
+
+<script>
+const SUPABASE_URL = 'https://jtcfcdqyzmixrsopyjgw.supabase.co';
+const $ = (id) => document.getElementById(id);
+let sb;
+let userId = null;
+let activities = [];
+
+// ─── LOGIN (shares the key with index.html) ───
+
+// Catch the app's read-only key up front: with it, updates and deletes silently change nothing.
+function keyProblem(key) {
+  if (key.startsWith('sb_publishable_')) return 'That is the publishable key. Use the service role (secret) key.';
+  if (key.startsWith('eyJ')) {
+    try {
+      const role = JSON.parse(atob(key.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))).role;
+      if (role !== 'service_role') return `That key has the "${role}" role. Use the service role key.`;
+    } catch { return 'That key could not be read.'; }
+  }
+  return null;
+}
+
+async function connect(key) {
+  const problem = keyProblem(key);
+  if (problem) { toast(problem, 'error'); return; }
+  sb = supabase.createClient(SUPABASE_URL, key, { auth: { persistSession: false } });
+  const { data, error } = await sb.from('profiles').select('id, name, member_id').order('id');
+  if (error) { toast('Invalid key or connection failed', 'error'); return; }
+  sessionStorage.setItem('sb_key', key);
+  $('login').hidden = true;
+  $('app').hidden = false;
+
+  $('user').innerHTML = data.map((p) => `<option value="${p.id}">${esc(p.name)} (${esc(p.member_id)})</option>`).join('');
+  const saved = Number(localStorage.getItem('journey_admin_user'));
+  userId = data.some((p) => p.id === saved) ? saved : data[0]?.id ?? null;
+  if (userId !== null) $('user').value = userId;
+  load();
+}
+
+$('connect').onclick = () => { const k = $('keyInput').value.trim(); if (k) connect(k); };
+$('keyInput').onkeydown = (e) => { if (e.key === 'Enter') $('connect').click(); };
+$('user').onchange = (e) => {
+  userId = Number(e.target.value);
+  localStorage.setItem('journey_admin_user', userId);
+  load();
+};
+{
+  const k = sessionStorage.getItem('sb_key');
+  if (k) { $('keyInput').value = k; connect(k); }
+}
+
+// ─── DATA ───
+
+async function load() {
+  if (userId === null) { render(); return; }
+  const { data, error } = await sb
+    .from('journey_activities')
+    .select('id, title, journey_check_ins(id, check_in_at, check_out_at, location)')
+    .eq('profile_id', userId);
+  if (error) { toast(error.message, 'error'); return; }
+  // Same order as the app: newest check-in first, activities by their latest check-in.
+  activities = data.map((a) => {
+    const checkIns = a.journey_check_ins
+      .map((c) => ({ ...c, in: Date.parse(c.check_in_at), out: c.check_out_at ? Date.parse(c.check_out_at) : null }))
+      .sort((x, y) => y.in - x.in);
+    const ms = checkIns.reduce((sum, c) => sum + (c.out === null ? 0 : c.out - c.in), 0);
+    return { id: a.id, title: a.title, checkIns, ms, latest: checkIns[0]?.in ?? 0 };
+  }).sort((x, y) => y.latest - x.latest);
+  render();
+}
+
+/** Runs a write and reloads. `.select()` makes a write that matched no rows visible instead of silently passing. */
+async function write(query, message) {
+  const { data, error } = await query.select();
+  if (error) { toast(error.message, 'error'); return false; }
+  if (!data?.length) { toast('Nothing was saved. Is this the service role key?', 'error'); return false; }
+  toast(message, 'success');
+  await load();
+  return true;
+}
+
+// ─── FORMATTING (matches src/data/user.ts) ───
+
+const pad = (n) => String(n).padStart(2, '0');
+const minutes = (ms) => Math.floor(ms / 60000);
+const fmtDuration = (ms) => `${Math.floor(minutes(ms) / 60)}h ${pad(minutes(ms) % 60)}m`;
+const fmtHours = (ms) => `${Math.floor(minutes(ms) / 60)}:${pad(minutes(ms) % 60)}`;
+
+/** ms -> value for <input type="datetime-local"> in local time. */
+const toLocal = (ms) => {
+  const d = new Date(ms);
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+};
+const fromLocal = (v) => new Date(v).toISOString();
+
+function esc(s) {
+  return String(s ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
+}
+
+// ─── RENDER ───
+
+function render() {
+  const total = activities.reduce((sum, a) => sum + a.ms, 0);
+  $('total').textContent = fmtHours(total);
+  $('count').textContent = activities.length;
+  $('list').innerHTML = activities.length
+    ? activities.map(renderActivity).join('')
+    : '<div class="empty">No events yet. Add one above.</div>';
+}
+
+function renderActivity(a) {
+  return `
+    <div class="item" data-activity="${a.id}">
+      <div class="item-head">
+        <input class="title" data-field="title" value="${esc(a.title)}" aria-label="Event title" />
+        <span class="pill">${a.checkIns.length} check-ins</span>
+        <span class="dur">${fmtDuration(a.ms)}</span>
+        <button class="btn-danger" data-action="delete-activity">Delete event</button>
+      </div>
+      <div class="item-body">
+        <form class="row quick" data-action="add-hours">
+          Add
+          <input class="num" type="number" min="0" name="h" placeholder="h" aria-label="Hours" /> h
+          <input class="num" type="number" min="0" max="59" name="m" placeholder="m" aria-label="Minutes" /> m
+          <input name="location" placeholder="Location" />
+          <button class="btn">Add hours</button>
+          <button type="button" class="btn-light" data-action="check-in-now">Check in now</button>
+        </form>
+        ${a.checkIns.map((c, i) => renderCheckIn(c, i + 1)).join('')}
+      </div>
+    </div>`;
+}
+
+function renderCheckIn(c, n) {
+  const spent = c.out === null ? null : c.out - c.in;
+  const h = spent === null ? '' : Math.floor(minutes(spent) / 60);
+  const m = spent === null ? '' : minutes(spent) % 60;
+  return `
+    <div class="checkin" data-checkin="${c.id}">
+      <div class="checkin-head">
+        <b>CHECK-IN #${n}${c.out === null ? ' <span class="open">· not checked out</span>' : ''}</b>
+        <span class="row">
+          ${c.out === null ? '<button class="btn-light" data-action="check-out-now">Check out now</button>' : ''}
+          <button class="btn-danger" data-action="delete-checkin">Delete</button>
+        </span>
+      </div>
+      <div class="fields">
+        <label>CHECK-IN<input type="datetime-local" data-field="check_in_at" value="${toLocal(c.in)}" /></label>
+        <label>CHECK-OUT<input type="datetime-local" data-field="check_out_at" value="${c.out === null ? '' : toLocal(c.out)}" /></label>
+        <label>DURATION
+          <span class="row">
+            <input class="num" type="number" min="0" data-field="h" value="${h}" placeholder="h" aria-label="Hours" /> h
+            <input class="num" type="number" min="0" max="59" data-field="m" value="${m}" placeholder="m" aria-label="Minutes" /> m
+          </span>
+        </label>
+        <label>LOCATION<input data-field="location" value="${esc(c.location)}" /></label>
+      </div>
+    </div>`;
+}
+
+// ─── EDITING ───
+
+const findActivity = (el) => activities.find((a) => a.id === Number(el.closest('[data-activity]')?.dataset.activity));
+const findCheckIn = (el) => {
+  const id = Number(el.closest('[data-checkin]')?.dataset.checkin);
+  return findActivity(el)?.checkIns.find((c) => c.id === id);
+};
+
+$('addActivity').onsubmit = async (e) => {
+  e.preventDefault();
+  const title = $('newTitle').value.trim();
+  if (!title) { toast('Enter an event title', 'error'); return; }
+  if (await write(sb.from('journey_activities').insert({ profile_id: userId, title }), 'Event added')) $('newTitle').value = '';
+};
+
+$('list').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const a = findActivity(form);
+  const mins = Number(form.h.value || 0) * 60 + Number(form.m.value || 0);
+  if (!a || mins <= 0) { toast('Enter hours or minutes to add', 'error'); return; }
+  // A finished check-in that ends now and lasts the given time.
+  const now = Date.now();
+  const row = {
+    activity_id: a.id,
+    check_in_at: new Date(now - mins * 60000).toISOString(),
+    check_out_at: new Date(now).toISOString(),
+    location: form.location.value.trim(),
+  };
+  await write(sb.from('journey_check_ins').insert(row), `Added ${fmtDuration(mins * 60000)}`);
+});
+
+$('list').addEventListener('click', async (e) => {
+  const action = e.target.dataset.action;
+  if (!action) return;
+  const a = findActivity(e.target);
+  if (!a) return;
+  if (action === 'delete-activity') {
+    if (!confirm(`Delete "${a.title}" and its ${a.checkIns.length} check-ins?`)) return;
+    const { error } = await sb.from('journey_check_ins').delete().eq('activity_id', a.id);
+    if (error) { toast(error.message, 'error'); return; }
+    await write(sb.from('journey_activities').delete().eq('id', a.id), 'Event deleted');
+  } else if (action === 'check-in-now') {
+    const location = e.target.form.location.value.trim();
+    await write(sb.from('journey_check_ins').insert({ activity_id: a.id, check_in_at: new Date().toISOString(), location }), 'Checked in');
+  } else if (action === 'check-out-now') {
+    const c = findCheckIn(e.target);
+    if (Date.now() <= c.in) { toast('Check-in is in the future', 'error'); return; }
+    await write(sb.from('journey_check_ins').update({ check_out_at: new Date().toISOString() }).eq('id', c.id), 'Checked out');
+  } else if (action === 'delete-checkin') {
+    if (!confirm('Delete this check-in?')) return;
+    await write(sb.from('journey_check_ins').delete().eq('id', findCheckIn(e.target).id), 'Check-in deleted');
+  }
+});
+
+$('list').addEventListener('change', async (e) => {
+  const field = e.target.dataset.field;
+  if (!field) return;
+  const a = findActivity(e.target);
+  if (!a) return;
+  const value = e.target.value.trim();
+
+  if (field === 'title') {
+    if (!value) { toast('Title cannot be empty', 'error'); e.target.value = a.title; return; }
+    await write(sb.from('journey_activities').update({ title: value }).eq('id', a.id), 'Title updated');
+    return;
+  }
+
+  const c = findCheckIn(e.target);
+  let update;
+  if (field === 'location') {
+    update = { location: value };
+  } else if (field === 'check_in_at') {
+    if (!value) { toast('Check-in time is required', 'error'); render(); return; }
+    // Moving the check-in keeps the duration, so total hours don't change unexpectedly.
+    const start = Date.parse(fromLocal(value));
+    update = { check_in_at: fromLocal(value) };
+    if (c.out !== null) update.check_out_at = new Date(start + (c.out - c.in)).toISOString();
+  } else if (field === 'check_out_at') {
+    if (value && Date.parse(fromLocal(value)) <= c.in) { toast('Check-out must be after check-in', 'error'); render(); return; }
+    update = { check_out_at: value ? fromLocal(value) : null };
+  } else {
+    // Duration (h or m): check-out = check-in + duration. Both empty = not checked out.
+    const box = e.target.closest('[data-checkin]');
+    const hv = box.querySelector('[data-field=h]').value;
+    const mv = box.querySelector('[data-field=m]').value;
+    const mins = Number(hv || 0) * 60 + Number(mv || 0);
+    if (hv === '' && mv === '') update = { check_out_at: null };
+    else if (mins <= 0) { toast('Duration must be more than 0', 'error'); render(); return; }
+    else update = { check_out_at: new Date(c.in + mins * 60000).toISOString() };
+  }
+  if (!(await write(sb.from('journey_check_ins').update(update).eq('id', c.id), 'Saved'))) render();
+});
+
+// ─── UI ───
+
+let toastTimer;
+function toast(msg, type) {
+  const el = $('toast');
+  el.textContent = msg;
+  el.className = type;
+  el.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.hidden = true; }, 2600);
+}
+</script>
+</body>
+</html>

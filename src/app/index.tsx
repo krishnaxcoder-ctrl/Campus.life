@@ -65,7 +65,7 @@ export default function Splash() {
                 <FeGaussianBlur stdDeviation={5 / SCALE} />
               </Filter>
             </Defs>
-            <G translateY={4 / SCALE} filter="url(#glow)">
+            <G transform={[{ translateY: 4 / SCALE }]} filter="url(#glow)">
               <AnimatedPath
                 d={LOGO_PATH}
                 stroke="rgba(125,96,245,0.2)"

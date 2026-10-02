@@ -33,6 +33,19 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 1
         }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to use your camera to scan event check-in codes.",
+          "recordAudioAndroid": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos to share them in event posts."
+        }
       ]
     ],
     "experiments": {
