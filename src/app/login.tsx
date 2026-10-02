@@ -84,7 +84,7 @@ export default function Login() {
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: '#F2F0F5' },
-  body: { flex: 1, alignItems: 'center', paddingTop: 80 },
+  body: { flex: 1, alignItems: 'center', paddingTop: 140 },
   logoRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   brand: {
     fontSize: 32,

@@ -1,7 +1,7 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { Fragment, type ReactNode, useState } from 'react';
-import { Alert, Image, type ImageSourcePropType, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Image, type ImageSourcePropType, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { MainBar } from '@/components/cl/app-bar';
 import { JoinPopup } from '@/components/cl/join-card';
@@ -15,11 +15,18 @@ type Row = { label: string; icon?: ImageSourcePropType; node?: ReactNode; onPres
 export function MenuTab() {
   const [join, setJoin] = useState(false);
   const { data: profile } = useProfile();
-  const logout = () =>
-    Alert.alert('Logout', 'Are you sure you want to logout?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Logout', style: 'destructive', onPress: () => router.replace('/login') },
-    ]);
+  const logout = () => {
+    if (Platform.OS === 'web') {
+      if (window.confirm('Are you sure you want to logout?')) {
+        router.replace('/login');
+      }
+    } else {
+      Alert.alert('Logout', 'Are you sure you want to logout?', [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Logout', style: 'destructive', onPress: () => router.replace('/login') },
+      ]);
+    }
+  };
 
   const sections: { title: string; rows: Row[] }[] = [
     {
