@@ -47,6 +47,7 @@ export default function RootLayout() {
         <Stack.Screen name="index" options={{ animation: 'none' }} />
         <Stack.Screen name="main" options={{ animation: 'fade' }} />
         <Stack.Screen name="login" options={{ animation: 'fade' }} />
+        <Stack.Screen name="otp" options={{ animation: 'slide_from_right' }} />
       </Stack>
     </>
   );

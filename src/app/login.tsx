@@ -1,8 +1,9 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
 import { useState } from 'react';
 import { Dimensions, Pressable, StyleSheet, TextInput, View } from 'react-native';
-import Svg, { Defs, LinearGradient as SvgGrad, Path, Stop } from 'react-native-svg';
+import Svg, { Circle, Defs, G, LinearGradient as SvgGrad, Path, Rect, Stop } from 'react-native-svg';
 
 import { StatusFill } from '@/components/cl/app-bar';
 import { T } from '@/components/cl/text';
@@ -37,7 +38,18 @@ export default function Login() {
         <T style={styles.tagline}>Connect. Engage. Thrive.</T>
 
         <View style={styles.inputCard}>
-          <T style={styles.flag}>🇮🇳</T>
+          <View style={styles.flagWrap}>
+            <Svg width={28} height={20} viewBox="0 0 900 600">
+              <Rect width="900" height="200" fill="#FF9933" />
+              <Rect y="200" width="900" height="200" fill="#FFFFFF" />
+              <Rect y="400" width="900" height="200" fill="#138808" />
+              <G transform="translate(450,300)">
+                <Circle r="60" fill="#000080" />
+                <Circle r="52" fill="#FFFFFF" />
+                <Circle r="16" fill="#000080" />
+              </G>
+            </Svg>
+          </View>
           <T style={styles.code}>+91</T>
           <View style={styles.divider} />
           <MaterialCommunityIcons name="phone" size={22} color="#999" style={styles.phoneIcon} />
@@ -52,7 +64,12 @@ export default function Login() {
           />
         </View>
 
-        <Pressable style={styles.loginBtn}>
+        <Pressable
+          style={styles.loginBtn}
+          onPress={() => {
+            if (phone.length === 10) router.push({ pathname: '/otp', params: { phone } });
+          }}
+        >
           <LinearGradient
             colors={['#7B5AFF', '#6366F1']}
             start={{ x: 0, y: 0 }}
@@ -113,8 +130,8 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 4,
   },
-  flag: { fontSize: 20 },
-  code: { marginLeft: 6, fontSize: 16, fontFamily: Fonts.os6, color: '#333' },
+  flagWrap: { width: 28, height: 20, borderRadius: 2, overflow: 'hidden' },
+  code: { marginLeft: 8, fontSize: 16, fontFamily: Fonts.os6, color: '#333' },
   divider: { width: 1, height: 28, backgroundColor: '#DDD', marginHorizontal: 12 },
   phoneIcon: { marginRight: 8 },
   input: {
