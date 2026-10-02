@@ -33,6 +33,8 @@ yarn-error.*
 # local env files
 .env
 .env*.local
+# admin pages' service role key
+admin/config.js
 
 # typescript
 *.tsbuildinfo

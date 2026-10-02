@@ -1,6 +1,8 @@
 // Shared by the admin pages: Supabase login, escaping, icons, toasts and the confirm dialog.
 
-const SUPABASE_URL = 'https://jtcfcdqyzmixrsopyjgw.supabase.co';
+// From config.js (gitignored) when it exists.
+const CONFIG = window.ADMIN_CONFIG ?? {};
+const SUPABASE_URL = CONFIG.supabaseUrl || 'https://jtcfcdqyzmixrsopyjgw.supabase.co';
 
 // Event titles from My Events in the app (src/data/cl.ts).
 const EVENT_TITLES = [
@@ -62,19 +64,23 @@ function keyProblem(key) {
   return null;
 }
 
-/** Shows the login card until a working service role key is entered, then calls `onReady(client)`. */
+/**
+ * Connects with the key from config.js, or shows the login card until a working
+ * service role key is entered. Then calls `onReady(client)`.
+ */
 function setupLogin(onReady) {
   renderIcons();
   const input = document.getElementById('keyInput');
+  const login = document.getElementById('login');
 
   async function connect(key) {
     const problem = keyProblem(key);
-    if (problem) { toast(problem, 'error'); return; }
+    if (problem) { login.hidden = false; toast(problem, 'error'); return; }
     const client = supabase.createClient(SUPABASE_URL, key, { auth: { persistSession: false } });
     const { error } = await client.from('profiles').select('id').limit(1);
-    if (error) { toast('Invalid key or connection failed', 'error'); return; }
-    sessionStorage.setItem('sb_key', key);
-    document.getElementById('login').hidden = true;
+    if (error) { login.hidden = false; toast('Invalid key or connection failed', 'error'); return; }
+    if (key !== CONFIG.serviceRoleKey) sessionStorage.setItem('sb_key', key);
+    login.hidden = true;
     document.getElementById('app').hidden = false;
     onReady(client);
   }
@@ -89,6 +95,13 @@ function setupLogin(onReady) {
     location.reload();
   });
 
+  // Key in config.js: no login card while connecting, and nothing to disconnect from.
+  if (CONFIG.serviceRoleKey) {
+    login.hidden = true;
+    document.getElementById('disconnect').hidden = true;
+    connect(CONFIG.serviceRoleKey);
+    return;
+  }
   const saved = sessionStorage.getItem('sb_key');
   if (saved) { input.value = saved; connect(saved); }
 }
