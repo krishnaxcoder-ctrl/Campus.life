@@ -8,13 +8,32 @@ import { T, TInput } from '@/components/cl/text';
 import { Colors, Fonts } from '@/constants/cl';
 import { Img } from '@/constants/cl-assets';
 import { EDIT_PROFILE } from '@/data/cl';
+import { type Profile, useProfile } from '@/data/user';
 
-type Values = typeof EDIT_PROFILE;
+type Values = typeof EDIT_PROFILE & ReturnType<typeof nameFields>;
 type Key = keyof Values;
 
+// First word is the first name, the rest the last name ("Krishna" / "Shyamsundar Phatkure").
+function nameFields(p: Profile | null | undefined) {
+  const name = p?.name ?? '';
+  const i = name.indexOf(' ');
+  return {
+    memberId: p?.memberId ?? '',
+    firstName: i < 0 ? name : name.slice(0, i),
+    lastName: i < 0 ? '' : name.slice(i + 1),
+    displayName: name,
+  };
+}
+
 export default function EditProfile() {
+  const { data: profile } = useProfile();
+  // Remount the form when the profile loads or changes so the fields start from it.
+  return <EditProfileForm key={profile ? `${profile.memberId}/${profile.name}` : ''} profile={profile} />;
+}
+
+function EditProfileForm({ profile }: { profile: Profile | null | undefined }) {
   const insets = useSafeAreaInsets();
-  const [v, setV] = useState<Values>(EDIT_PROFILE);
+  const [v, setV] = useState<Values>(() => ({ ...EDIT_PROFILE, ...nameFields(profile) }));
   const [privateMode, setPrivateMode] = useState(false);
   const set = (k: Key) => (t: string) => setV((s) => ({ ...s, [k]: t }));
 

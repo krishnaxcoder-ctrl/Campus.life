@@ -21,6 +21,12 @@ function RightIcon({ src, w, h, centerFromRight, onPress }: BarIcon) {
   );
 }
 
+/** Back, or to the home screen when the page was opened directly (e.g. a web URL) and has no history. */
+export function goBack() {
+  if (router.canGoBack()) router.back();
+  else router.replace('/main');
+}
+
 /** Purple area painted behind the transparent status bar. */
 export function StatusFill() {
   const insets = useSafeAreaInsets();
@@ -97,7 +103,7 @@ export function BackBar({
   return (
     <View style={[{ backgroundColor: Colors.purple, paddingTop: insets.top }, !web && !noInset && styles.elevated]}>
       <View style={styles.bar}>
-        <Pressable onPress={() => router.back()} hitSlop={12} style={styles.back}>
+        <Pressable onPress={goBack} hitSlop={12} style={styles.back}>
           <Image source={Mask.back} style={styles.backImg} />
         </Pressable>
         <T numberOfLines={1} style={titleStyle}>

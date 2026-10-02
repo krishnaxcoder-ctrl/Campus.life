@@ -188,34 +188,6 @@ export const MY_EVENTS = [
   'Swach Bharat_Aids',
 ];
 
-export type CheckIn = { checkIn: string; checkOut: string; duration: string; location: string };
-export type JourneyItem = { id: string; title: string; total: string; checkIns: CheckIn[] };
-
-export const JOURNEY: JourneyItem[] = [
-  {
-    id: 'j1',
-    title: 'Swach Bharat_Panambur_26/09/26',
-    total: '0h 01m',
-    checkIns: [
-      { checkIn: '02 Oct 2026, 13:22', checkOut: 'Not checked out', duration: '—', location: 'panambur beach' },
-      { checkIn: '01 Oct 2026, 18:46', checkOut: '01 Oct 2026, 18:48', duration: '0h 01m', location: 'panambur beach' },
-    ],
-  },
-  {
-    id: 'j2',
-    title: 'Swach Bharat_Aids 2Nd Year_Beach Cleaning _Nitk',
-    total: '0h 28m',
-    // Sample entries: the screenshots only show this item collapsed.
-    checkIns: [
-      { checkIn: '30 Sep 2026, 07:02', checkOut: '30 Sep 2026, 07:10', duration: '0h 08m', location: 'nitk beach' },
-      { checkIn: '29 Sep 2026, 07:05', checkOut: '29 Sep 2026, 07:11', duration: '0h 06m', location: 'nitk beach' },
-      { checkIn: '28 Sep 2026, 07:00', checkOut: '28 Sep 2026, 07:05', duration: '0h 05m', location: 'nitk beach' },
-      { checkIn: '27 Sep 2026, 07:04', checkOut: '27 Sep 2026, 07:09', duration: '0h 05m', location: 'nitk beach' },
-      { checkIn: '26 Sep 2026, 07:01', checkOut: '26 Sep 2026, 07:05', duration: '0h 04m', location: 'nitk beach' },
-    ],
-  },
-];
-
 export const PEOPLE = [
   'ABDUL FATHAH', 'Abhay RajB', 'ABHINAND K', 'ABHISHEK GR', 'ABHISHEK P', 'AFTAB HUSSAINSHAIK',
   'AINAM MANSIA', 'AISHWARYA AMESTHA', 'AJITH S', 'AMAL TJ', 'AMEEN AHZAN', 'ANANYA', 'CHAITHANYA',
@@ -226,15 +198,9 @@ export const PEOPLE = [
   'RIYA MATHEW',
 ];
 
-export const PROFILE = { name: 'Krishna Shyamsundar Phatkure', memberId: '1844116' };
-
-// Values shown on the Edit Profile screen.
+// Values shown on the Edit Profile screen. Name and member ID come from the profile (see data/user.ts).
 export const EDIT_PROFILE = {
   mobile: '9967180937',
-  memberId: '1844116',
-  firstName: 'Krishna',
-  lastName: 'Shyamsundar Phatkure',
-  displayName: 'Krishna Shyamsundar Phatkure',
   email: 'krishnaphatkure0@gmail.com',
   organization: '',
   dob: '2026-03-14',

@@ -1,18 +1,22 @@
 import { FontAwesome6 } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { T } from '@/components/cl/text';
 import { WebPage } from '@/components/cl/web-page';
 import { Colors, Fonts, PURPLE } from '@/constants/cl';
-import { type CheckIn, JOURNEY, type JourneyItem } from '@/data/cl';
+import { type CheckIn, type JourneyItem, useJourney } from '@/data/user';
 
 export default function Journey() {
-  const [open, setOpen] = useState<string | null>(JOURNEY[0].id);
+  const { data: journey, error, reload } = useJourney();
+  // undefined until the user toggles a card: the newest activity starts expanded.
+  const [toggled, setToggled] = useState<string | null>();
+  const items = journey?.items ?? [];
+  const open = toggled === undefined ? items[0]?.id : toggled;
 
   return (
-    <WebPage title="My Volunteer Journey">
+    <WebPage title="My Volunteer Journey" onRefresh={reload}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.hero}>
           <T style={styles.heroTitle}>
@@ -24,12 +28,12 @@ export default function Journey() {
         <View style={styles.stats}>
           <View style={styles.stat}>
             <FontAwesome6 name="clock" solid size={32.4} color={PURPLE} />
-            <T style={styles.statNum}>0:30</T>
+            <T style={styles.statNum}>{journey?.totalHours ?? '–'}</T>
             <T style={styles.statLabel}>TOTAL HOURS</T>
           </View>
           <View style={styles.stat}>
             <FontAwesome6 solid name="list-check" size={30} color={PURPLE} style={{ marginTop: 1.2 }} />
-            <T style={styles.statNum}>{JOURNEY.length}</T>
+            <T style={styles.statNum}>{journey ? items.length : '–'}</T>
             <T style={styles.statLabel}>ACTIVITIES</T>
           </View>
         </View>
@@ -39,14 +43,20 @@ export default function Journey() {
             <FontAwesome6 solid name="clock-rotate-left" size={24} color={PURPLE} />
             <T style={styles.journeyTitle}>Your Journey</T>
           </View>
-          {JOURNEY.map((item) => (
-            <JourneyCard
-              key={item.id}
-              item={item}
-              open={open === item.id}
-              onToggle={() => setOpen((v) => (v === item.id ? null : item.id))}
-            />
-          ))}
+          {journey ? (
+            items.map((item) => (
+              <JourneyCard
+                key={item.id}
+                item={item}
+                open={open === item.id}
+                onToggle={() => setToggled(open === item.id ? null : item.id)}
+              />
+            ))
+          ) : error ? (
+            <T style={styles.status}>Couldn&apos;t load your journey. Tap refresh to try again.</T>
+          ) : (
+            <ActivityIndicator color={PURPLE} style={styles.loading} />
+          )}
         </View>
       </ScrollView>
     </WebPage>
@@ -122,6 +132,8 @@ const styles = StyleSheet.create({
   journey: { marginTop: 30.1, padding: 15.2, paddingBottom: 31, borderRadius: 20, backgroundColor: Colors.white },
   journeyHead: { flexDirection: 'row', alignItems: 'center', paddingLeft: 0, paddingTop: 5.8, marginBottom: 21 },
   journeyTitle: { marginLeft: 10.7, fontFamily: Fonts.pp7, fontSize: 23.8, lineHeight: 34, color: PURPLE },
+  loading: { marginVertical: 20 },
+  status: { marginVertical: 20, fontFamily: Fonts.pp4, fontSize: 14.2, lineHeight: 21, color: '#888888', textAlign: 'center' },
 
   item: { marginBottom: 16, borderWidth: 1.5, borderColor: '#EEEEEE', borderRadius: 16, overflow: 'hidden' },
   itemHead: { flexDirection: 'row', alignItems: 'center', paddingHorizontal: 15.7, paddingVertical: 20 },

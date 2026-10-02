@@ -1,8 +1,7 @@
-import { router } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
-import { BackBar } from '@/components/cl/app-bar';
+import { BackBar, goBack } from '@/components/cl/app-bar';
 import { T } from '@/components/cl/text';
 import { Colors, Fonts } from '@/constants/cl';
 
@@ -16,7 +15,7 @@ export default function QuickHelp() {
       Alert.alert('Campus.Life', 'Please select an issue');
       return;
     }
-    Alert.alert('Campus.Life', 'Your request has been submitted', [{ text: 'OK', onPress: () => router.back() }]);
+    Alert.alert('Campus.Life', 'Your request has been submitted', [{ text: 'OK', onPress: goBack }]);
   };
 
   return (

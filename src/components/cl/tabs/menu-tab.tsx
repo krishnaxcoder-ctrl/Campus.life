@@ -8,12 +8,13 @@ import { JoinPopup } from '@/components/cl/join-card';
 import { T } from '@/components/cl/text';
 import { Colors } from '@/constants/cl';
 import { Icon, Img, px } from '@/constants/cl-assets';
-import { PROFILE } from '@/data/cl';
+import { useProfile } from '@/data/user';
 
 type Row = { label: string; icon?: ImageSourcePropType; node?: ReactNode; onPress?: () => void };
 
 export function MenuTab() {
   const [join, setJoin] = useState(false);
+  const { data: profile } = useProfile();
   const logout = () =>
     Alert.alert('Logout', 'Are you sure you want to logout?', [
       { text: 'Cancel', style: 'cancel' },
@@ -64,9 +65,9 @@ export function MenuTab() {
           <Image source={Img.avatarMenu} style={styles.avatar} />
           <View style={styles.profileText}>
             <T style={styles.name} numberOfLines={1}>
-              {PROFILE.name}
+              {profile?.name}
             </T>
-            <T style={styles.member}>Member ID: {PROFILE.memberId}</T>
+            <T style={styles.member}>Member ID: {profile?.memberId}</T>
           </View>
         </View>
         {sections.map((s) => (

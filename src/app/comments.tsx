@@ -7,12 +7,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BackBar } from '@/components/cl/app-bar';
 import { T, TInput } from '@/components/cl/text';
 import { Colors, Fonts } from '@/constants/cl';
-import { PROFILE } from '@/data/cl';
+import { useProfile } from '@/data/user';
 
 export default function Comments() {
   const insets = useSafeAreaInsets();
   const [text, setText] = useState('');
   const [comments, setComments] = useState<string[]>([]);
+  const { data: profile } = useProfile();
 
   const send = () => {
     if (!text.trim()) return;
@@ -32,7 +33,7 @@ export default function Comments() {
           <ScrollView contentContainerStyle={styles.list}>
             {comments.map((c, i) => (
               <View key={i} style={styles.comment}>
-                <T style={styles.commentName}>{PROFILE.name}</T>
+                <T style={styles.commentName}>{profile?.name}</T>
                 <T style={styles.commentText}>{c}</T>
               </View>
             ))}

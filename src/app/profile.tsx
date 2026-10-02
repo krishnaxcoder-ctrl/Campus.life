@@ -6,12 +6,13 @@ import { BackBar } from '@/components/cl/app-bar';
 import { T } from '@/components/cl/text';
 import { Colors, Fonts } from '@/constants/cl';
 import { Img, px } from '@/constants/cl-assets';
-import { PROFILE } from '@/data/cl';
+import { useProfile } from '@/data/user';
 
 const TABS = ["I'm Following", 'My Followers', 'My Activities'];
 
 export default function Profile() {
   const [tab, setTab] = useState(0);
+  const { data: profile } = useProfile();
 
   return (
     <View style={styles.flex}>
@@ -19,9 +20,9 @@ export default function Profile() {
       <View style={styles.top}>
         <Image source={Img.avatarProfile} style={styles.avatar} />
         <T style={styles.name} numberOfLines={1} ellipsizeMode="clip">
-          {PROFILE.name}
+          {profile?.name}
         </T>
-        <T style={styles.member}>Member ID: {PROFILE.memberId}</T>
+        <T style={styles.member}>Member ID: {profile?.memberId}</T>
         <T style={styles.district}>Dakshina Kannada</T>
 
         <T style={[styles.count, { left: 10 }]}>0</T>
