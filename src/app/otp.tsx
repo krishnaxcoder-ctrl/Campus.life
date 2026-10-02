@@ -2,12 +2,14 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, Platform, Pressable, StyleSheet, TextInput, View } from 'react-native';
 import Svg, { Circle, Defs, G, Line, Path, Rect } from 'react-native-svg';
 
 import { StatusFill } from '@/components/cl/app-bar';
 import { T } from '@/components/cl/text';
 import { Colors, Fonts } from '@/constants/cl';
+import { supabase } from '@/lib/supabase';
+import { setLoggedInMemberId } from '@/lib/supabase';
 
 const OTP_LEN = 6;
 const TIMER_SECONDS = 180;
@@ -15,7 +17,6 @@ const TIMER_SECONDS = 180;
 function MailIllustration() {
   return (
     <Svg width={120} height={100} viewBox="0 0 120 100">
-      {/* sparkles */}
       <Path d="M32 18 L34 12 L36 18 L34 24 Z" fill="#7B5AFF" opacity={0.6} />
       <Path d="M88 14 L90 8 L92 14 L90 20 Z" fill="#7B5AFF" opacity={0.6} />
       <Path d="M22 52 L24 48 L26 52 L24 56 Z" fill="#7B5AFF" opacity={0.4} />
@@ -24,9 +25,7 @@ function MailIllustration() {
       <Circle cx={92} cy={68} r={2} fill="#7B5AFF" opacity={0.3} />
       <Circle cx={40} cy={80} r={1.5} fill="#7B5AFF" opacity={0.25} />
       <Circle cx={80} cy={78} r={1.5} fill="#7B5AFF" opacity={0.25} />
-      {/* envelope body */}
       <Rect x={30} y={40} width={60} height={42} rx={4} fill="#7B5AFF" />
-      {/* letter sticking out */}
       <G>
         <Rect x={36} y={24} width={48} height={36} rx={3} fill="#F0EEF8" />
         {[0, 1, 2, 3, 4].map((i) => (
@@ -42,18 +41,25 @@ function MailIllustration() {
           />
         ))}
       </G>
-      {/* envelope flap */}
       <Path d="M30 42 L60 62 L90 42" fill="none" stroke="#6A4FE8" strokeWidth={2} />
-      {/* envelope front overlay */}
       <Path d="M30 82 L30 48 L60 68 L90 48 L90 82 Z" fill="#8B6FFF" />
       <Defs />
     </Svg>
   );
 }
 
+function showError(msg: string) {
+  if (Platform.OS === 'web') {
+    window.alert(msg);
+  } else {
+    Alert.alert('Error', msg);
+  }
+}
+
 export default function OtpScreen() {
   const { phone } = useLocalSearchParams<{ phone: string }>();
   const [otp, setOtp] = useState<string[]>(Array(OTP_LEN).fill(''));
+  const [loading, setLoading] = useState(false);
   const [seconds, setSeconds] = useState(TIMER_SECONDS);
   const refs = useRef<(TextInput | null)[]>([]);
 
@@ -86,6 +92,38 @@ export default function OtpScreen() {
     }
   };
 
+  const verify = async () => {
+    const password = otp.join('');
+    if (password.length !== OTP_LEN) {
+      showError('Please enter the full 6-digit code.');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('member_id')
+        .eq('phone', phone ?? '')
+        .eq('password', password)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (!data) {
+        showError('Invalid phone number or password.');
+        return;
+      }
+
+      setLoggedInMemberId(data.member_id);
+      router.replace('/main');
+    } catch (e: unknown) {
+      showError(e instanceof Error ? e.message : 'Something went wrong.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <View style={styles.root}>
       <StatusFill />
@@ -99,7 +137,6 @@ export default function OtpScreen() {
       <View style={styles.body}>
         <T style={styles.title}>VERIFICATION</T>
 
-        {/* Circular timer */}
         <View style={styles.timerWrap}>
           <Svg width={140} height={140} viewBox="0 0 140 140">
             <Circle
@@ -134,7 +171,6 @@ export default function OtpScreen() {
 
         <MailIllustration />
 
-        {/* OTP inputs */}
         <View style={styles.otpRow}>
           {otp.map((digit, i) => (
             <TextInput
@@ -156,8 +192,9 @@ export default function OtpScreen() {
         </Pressable>
 
         <Pressable
-          style={styles.verifyBtn}
-          onPress={() => router.replace('/main')}
+          style={[styles.verifyBtn, loading && styles.verifyBtnDisabled]}
+          onPress={verify}
+          disabled={loading}
         >
           <LinearGradient
             colors={['#7B5AFF', '#6366F1']}
@@ -165,7 +202,7 @@ export default function OtpScreen() {
             end={{ x: 1, y: 0 }}
             style={styles.gradient}
           >
-            <T style={styles.verifyText}>VERIFY</T>
+            <T style={styles.verifyText}>{loading ? 'VERIFYING...' : 'VERIFY'}</T>
           </LinearGradient>
         </Pressable>
       </View>
@@ -245,6 +282,9 @@ const styles = StyleSheet.create({
     width: '68%',
     borderRadius: 30,
     overflow: 'hidden',
+  },
+  verifyBtnDisabled: {
+    opacity: 0.6,
   },
   gradient: {
     height: 54,

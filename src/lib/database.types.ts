@@ -85,18 +85,24 @@ export type Database = {
           id: number
           member_id: string
           name: string
+          password: string | null
+          phone: string | null
         }
         Insert: {
           created_at?: string
           id?: never
           member_id: string
           name: string
+          password?: string | null
+          phone?: string | null
         }
         Update: {
           created_at?: string
           id?: never
           member_id?: string
           name?: string
+          password?: string | null
+          phone?: string | null
         }
         Relationships: []
       }

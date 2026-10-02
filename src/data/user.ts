@@ -1,7 +1,7 @@
 // Per-user data loaded from Supabase: the profile (name, member ID) and the volunteering journey.
 import { useCallback, useEffect, useState } from 'react';
 
-import { MEMBER_ID, supabase } from '@/lib/supabase';
+import { getMemberId, supabase } from '@/lib/supabase';
 
 export type Profile = { name: string; memberId: string };
 
@@ -13,7 +13,7 @@ async function fetchProfile(): Promise<Profile | null> {
   const { data, error } = await supabase
     .from('profiles')
     .select('name, member_id')
-    .eq('member_id', MEMBER_ID)
+    .eq('member_id', getMemberId())
     .maybeSingle();
   if (error) throw error;
   return data && { name: data.name, memberId: data.member_id };
@@ -23,7 +23,7 @@ async function fetchJourney(): Promise<Journey> {
   const { data, error } = await supabase
     .from('profiles')
     .select('journey_activities(id, title, journey_check_ins(check_in_at, check_out_at, location))')
-    .eq('member_id', MEMBER_ID)
+    .eq('member_id', getMemberId())
     .maybeSingle();
   if (error) throw error;
 
