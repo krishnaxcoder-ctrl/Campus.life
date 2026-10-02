@@ -4,323 +4,152 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Campus.Life Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="ui.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-<style>
-  :root {
-    --purple: #5109B5;
-    --purple-light: #7B5AFF;
-    --bg: #F2F0F5;
-    --card: #FFFFFF;
-    --text: #333;
-    --text-light: #888;
-    --border: #E6E6E6;
-    --danger: #DC3545;
-    --success: #198754;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
-
-  .header {
-    background: var(--purple);
-    color: #fff;
-    padding: 16px 24px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-  .header h1 { font-size: 20px; font-weight: 700; }
-  .header .status { font-size: 13px; opacity: 0.8; }
-
-  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
-
-  .tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 24px;
-    border-bottom: 2px solid var(--border);
-    padding-bottom: 0;
-  }
-  .tab {
-    padding: 10px 20px;
-    border: none;
-    background: none;
-    font-size: 15px;
-    font-weight: 600;
-    color: var(--text-light);
-    cursor: pointer;
-    border-bottom: 3px solid transparent;
-    margin-bottom: -2px;
-    transition: all 0.2s;
-  }
-  .tab.active { color: var(--purple); border-bottom-color: var(--purple); }
-  .tab:hover { color: var(--purple-light); }
-
-  .panel { display: none; }
-  .panel.active { display: block; }
-
-  .card {
-    background: var(--card);
-    border-radius: 12px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
-    margin-bottom: 16px;
-    overflow: hidden;
-  }
-  .card-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .card-header h2 { font-size: 17px; color: var(--purple); }
-  .card-body { padding: 20px; }
-
-  table { width: 100%; border-collapse: collapse; font-size: 14px; }
-  th { text-align: left; padding: 10px 12px; background: #F8F7FA; color: var(--text-light); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
-  td { padding: 10px 12px; border-top: 1px solid var(--border); vertical-align: middle; }
-  tr:hover td { background: #FAFAFF; }
-
-  .btn {
-    padding: 7px 16px;
-    border: none;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity 0.2s;
-  }
-  .btn:hover { opacity: 0.85; }
-  .btn-primary { background: var(--purple); color: #fff; }
-  .btn-danger { background: var(--danger); color: #fff; }
-  .btn-success { background: var(--success); color: #fff; }
-  .btn-sm { padding: 5px 12px; font-size: 12px; }
-  .btn-group { display: flex; gap: 6px; }
-
-  .form-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
-  .form-group { flex: 1; min-width: 180px; }
-  .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-light); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.3px; }
-  .form-group input, .form-group select {
-    width: 100%;
-    padding: 9px 12px;
-    border: 1.5px solid var(--border);
-    border-radius: 8px;
-    font-size: 14px;
-    font-family: inherit;
-    outline: none;
-    transition: border-color 0.2s;
-  }
-  .form-group input:focus, .form-group select:focus { border-color: var(--purple-light); }
-
-  .badge {
-    display: inline-block;
-    padding: 3px 10px;
-    border-radius: 20px;
-    font-size: 11px;
-    font-weight: 700;
-  }
-  .badge-purple { background: #EFE1FE; color: var(--purple); }
-  .badge-green { background: #D1F5E0; color: var(--success); }
-
-  .toast {
-    position: fixed;
-    bottom: 24px;
-    right: 24px;
-    padding: 12px 20px;
-    border-radius: 10px;
-    color: #fff;
-    font-size: 14px;
-    font-weight: 600;
-    z-index: 999;
-    animation: slideIn 0.3s ease;
-    display: none;
-  }
-  .toast.success { background: var(--success); }
-  .toast.error { background: var(--danger); }
-  @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-  .empty { text-align: center; padding: 40px; color: var(--text-light); }
-
-  .login-wrap {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 20px;
-  }
-  .login-card {
-    background: var(--card);
-    border-radius: 16px;
-    padding: 40px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-    width: 100%;
-    max-width: 420px;
-    text-align: center;
-  }
-  .login-card h1 { color: var(--purple); font-size: 24px; margin-bottom: 8px; }
-  .login-card p { color: var(--text-light); font-size: 14px; margin-bottom: 24px; }
-  .login-card input {
-    width: 100%;
-    padding: 12px 16px;
-    border: 1.5px solid var(--border);
-    border-radius: 10px;
-    font-size: 14px;
-    margin-bottom: 16px;
-    font-family: monospace;
-    outline: none;
-  }
-  .login-card input:focus { border-color: var(--purple-light); }
-  .login-card .btn { width: 100%; padding: 12px; font-size: 16px; }
-
-  @media (max-width: 600px) {
-    .form-row { flex-direction: column; }
-    .form-group { min-width: 100%; }
-    table { font-size: 12px; }
-    th, td { padding: 8px 6px; }
-  }
-</style>
+<script src="shared.js"></script>
 </head>
 <body>
 
-<!-- Login Screen -->
-<div id="loginScreen" class="login-wrap">
-  <div class="login-card">
-    <h1>Campus.Life Admin</h1>
-    <p>Enter your Supabase Service Role Key to access the admin panel</p>
-    <input type="password" id="keyInput" placeholder="Service Role Key" />
-    <button class="btn btn-primary" onclick="doLogin()">Connect</button>
-  </div>
-</div>
-
-<!-- Main App -->
-<div id="app" style="display:none;">
-  <div class="header">
-    <h1>Campus.Life Admin</h1>
-    <a href="journey.html" style="color:#fff;font-size:14px;font-weight:600;">Journey &amp; hours &rarr;</a>
-  </div>
-
-  <div class="container">
-    <div class="tabs">
-      <button class="tab active" onclick="switchTab('profiles', this)">Users</button>
-      <button class="tab" onclick="switchTab('activities', this)">Activities</button>
-      <button class="tab" onclick="switchTab('checkins', this)">Check-ins</button>
-    </div>
-
-    <!-- PROFILES -->
-    <div id="panel-profiles" class="panel active">
-      <div class="card">
-        <div class="card-header">
-          <h2>Users / Profiles</h2>
-          <button class="btn btn-primary btn-sm" onclick="showAddProfile()">+ Add User</button>
-        </div>
-        <div class="card-body" id="addProfileForm" style="display:none; border-bottom: 1px solid var(--border);">
-          <div class="form-row">
-            <div class="form-group"><label>Name</label><input id="pName" placeholder="Full name" /></div>
-            <div class="form-group"><label>Member ID</label><input id="pMemberId" placeholder="e.g. 1844116" /></div>
-          </div>
-          <div class="form-row">
-            <div class="form-group"><label>Phone</label><input id="pPhone" placeholder="10-digit number" /></div>
-            <div class="form-group"><label>Password</label><input id="pPassword" placeholder="6-digit code" /></div>
-          </div>
-          <div class="btn-group">
-            <button class="btn btn-success btn-sm" onclick="saveProfile()">Save</button>
-            <button class="btn btn-sm" style="background:#eee;" onclick="hideAddProfile()">Cancel</button>
-          </div>
-        </div>
-        <div id="profilesTable"></div>
+<div id="login" class="login">
+  <form id="loginForm" class="card">
+    <div class="card-header">
+      <div>
+        <h1 class="card-title">Campus.Life Admin</h1>
+        <p class="card-description">Enter the Supabase service role key. The app's own key is read-only.</p>
       </div>
     </div>
+    <div class="card-content">
+      <label class="label" for="keyInput">Service role key</label>
+      <input class="input" type="password" id="keyInput" autocomplete="off" />
+      <button class="btn" style="width: 100%; margin-top: 16px;">Connect</button>
+    </div>
+  </form>
+</div>
+
+<div id="app" hidden>
+  <header class="site-header">
+    <div class="inner">
+      <span class="brand"><span class="brand-mark">CL</span><span class="brand-name">Campus.Life Admin</span></span>
+      <nav class="nav">
+        <a href="journey.html">Journey</a>
+        <a href="index.html" aria-current="page">All tables</a>
+      </nav>
+      <button type="button" class="btn btn-ghost btn-sm" id="disconnect" aria-label="Disconnect"><span data-icon="logOut"></span><span class="hide-sm">Disconnect</span></button>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="page-head">
+      <h1 class="page-title">All tables</h1>
+      <p class="page-desc">Raw rows in Supabase. For hours and events, the Journey page is easier.</p>
+    </div>
+
+    <div class="tabs-list" role="tablist">
+      <button class="tabs-trigger" role="tab" data-tab="profiles" aria-selected="true">Users</button>
+      <button class="tabs-trigger" role="tab" data-tab="activities" aria-selected="false">Activities</button>
+      <button class="tabs-trigger" role="tab" data-tab="checkins" aria-selected="false">Check-ins</button>
+    </div>
+
+    <!-- USERS -->
+    <section class="card" id="panel-profiles" role="tabpanel">
+      <div class="card-header">
+        <div><h2 class="card-title">Users</h2><p class="card-description">Name, phone and password save when you leave the field.</p></div>
+        <button type="button" class="btn btn-sm" data-toggle="addProfileForm"><span data-icon="plus"></span>Add user</button>
+      </div>
+      <form class="card-content grid grid-2" id="addProfileForm" hidden>
+        <div><label class="label" for="pName">Name</label><input class="input" id="pName" placeholder="Full name" /></div>
+        <div><label class="label" for="pMemberId">Member ID</label><input class="input" id="pMemberId" inputmode="numeric" placeholder="e.g. 1844116" /></div>
+        <div><label class="label" for="pPhone">Phone</label><input class="input" id="pPhone" type="tel" inputmode="numeric" autocomplete="off" placeholder="10-digit number" /><p class="field-hint">Used to log in to the app.</p></div>
+        <div><label class="label" for="pPassword">Password</label><input class="input" id="pPassword" inputmode="numeric" maxlength="6" placeholder="6-digit code" /><p class="field-hint">The OTP entered at login.</p></div>
+        <div class="row" style="grid-column: 1 / -1; justify-content: flex-end;">
+          <button type="button" class="btn btn-outline" data-toggle="addProfileForm">Cancel</button>
+          <button class="btn">Save user</button>
+        </div>
+      </form>
+      <div class="card-content flush"><div class="table-wrap" id="profilesTable"></div></div>
+    </section>
 
     <!-- ACTIVITIES -->
-    <div id="panel-activities" class="panel">
-      <div class="card">
-        <div class="card-header">
-          <h2>Journey Activities</h2>
-          <button class="btn btn-primary btn-sm" onclick="showAddActivity()">+ Add Activity</button>
-        </div>
-        <div class="card-body" id="addActivityForm" style="display:none; border-bottom: 1px solid var(--border);">
-          <div class="form-row">
-            <div class="form-group"><label>Profile</label><select id="aProfileId"></select></div>
-            <div class="form-group"><label>Title</label><input id="aTitle" placeholder="Activity title" /></div>
-          </div>
-          <div class="btn-group">
-            <button class="btn btn-success btn-sm" onclick="saveActivity()">Save</button>
-            <button class="btn btn-sm" style="background:#eee;" onclick="hideAddActivity()">Cancel</button>
-          </div>
-        </div>
-        <div id="activitiesTable"></div>
+    <section class="card" id="panel-activities" role="tabpanel" hidden>
+      <div class="card-header">
+        <div><h2 class="card-title">Journey activities</h2><p class="card-description">The events listed on each user's journey.</p></div>
+        <button type="button" class="btn btn-sm" data-toggle="addActivityForm"><span data-icon="plus"></span>Add activity</button>
       </div>
-    </div>
+      <form class="card-content grid grid-2" id="addActivityForm" hidden>
+        <div><span class="label">User</span><div id="aProfile"></div></div>
+        <div><span class="label">Title</span><div id="aTitle"></div></div>
+        <div class="row" style="grid-column: 1 / -1; justify-content: flex-end;">
+          <button type="button" class="btn btn-outline" data-toggle="addActivityForm">Cancel</button>
+          <button class="btn">Save activity</button>
+        </div>
+      </form>
+      <div class="card-content flush"><div class="table-wrap" id="activitiesTable"></div></div>
+    </section>
 
     <!-- CHECK-INS -->
-    <div id="panel-checkins" class="panel">
-      <div class="card">
-        <div class="card-header">
-          <h2>Check-ins</h2>
-          <button class="btn btn-primary btn-sm" onclick="showAddCheckin()">+ Add Check-in</button>
-        </div>
-        <div class="card-body" id="addCheckinForm" style="display:none; border-bottom: 1px solid var(--border);">
-          <div class="form-row">
-            <div class="form-group"><label>Activity</label><select id="cActivityId"></select></div>
-            <div class="form-group"><label>Location</label><input id="cLocation" placeholder="Location name" /></div>
-          </div>
-          <div class="form-row">
-            <div class="form-group"><label>Check-in At</label><input type="datetime-local" id="cCheckIn" /></div>
-            <div class="form-group"><label>Check-out At</label><input type="datetime-local" id="cCheckOut" /></div>
-          </div>
-          <div class="btn-group">
-            <button class="btn btn-success btn-sm" onclick="saveCheckin()">Save</button>
-            <button class="btn btn-sm" style="background:#eee;" onclick="hideAddCheckin()">Cancel</button>
-          </div>
-        </div>
-        <div id="checkinsTable"></div>
+    <section class="card" id="panel-checkins" role="tabpanel" hidden>
+      <div class="card-header">
+        <div><h2 class="card-title">Check-ins</h2><p class="card-description">Each check-in counts towards the user's total hours once it has a check-out.</p></div>
+        <button type="button" class="btn btn-sm" data-toggle="addCheckinForm"><span data-icon="plus"></span>Add check-in</button>
       </div>
-    </div>
-  </div>
+      <form class="card-content grid grid-form" id="addCheckinForm" hidden>
+        <div><span class="label">Activity</span><div id="cActivity"></div></div>
+        <div><span class="label">Date</span><div id="cDate"></div></div>
+        <div><span class="label">Check-in</span><div id="cIn"></div></div>
+        <div><span class="label">Check-out</span><div id="cOut"></div><p class="field-hint">Empty = not checked out yet.</p></div>
+        <div class="row" style="grid-column: 1 / -1; justify-content: flex-end;">
+          <button type="button" class="btn btn-outline" data-toggle="addCheckinForm">Cancel</button>
+          <button class="btn">Save check-in</button>
+        </div>
+      </form>
+      <div class="card-content flush"><div class="table-wrap" id="checkinsTable"></div></div>
+    </section>
+  </main>
 </div>
 
-<div class="toast" id="toast"></div>
-
 <script>
-const SUPABASE_URL = 'https://jtcfcdqyzmixrsopyjgw.supabase.co';
+const $ = (id) => document.getElementById(id);
 let sb;
-
-// With the app's read-only key, edits silently change nothing, so reject it up front.
-function keyProblem(key) {
-  if (key.startsWith('sb_publishable_')) return 'That is the publishable key. Use the service role (secret) key.';
-  if (key.startsWith('eyJ')) {
-    try {
-      const role = JSON.parse(atob(key.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))).role;
-      if (role !== 'service_role') return `That key has the "${role}" role. Use the service role key.`;
-    } catch { return 'That key could not be read.'; }
-  }
-  return null;
-}
-
-function doLogin() {
-  const key = document.getElementById('keyInput').value.trim();
-  if (!key) return;
-  const problem = keyProblem(key);
-  if (problem) { toast(problem, 'error'); return; }
-  sb = supabase.createClient(SUPABASE_URL, key);
-  sb.from('profiles').select('id').limit(1).then(({ error }) => {
-    if (error) { toast('Invalid key or connection failed', 'error'); return; }
-    sessionStorage.setItem('sb_key', key);
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    loadAll();
-  });
-}
-
-// Auto-login if key in session
-(function() {
-  const k = sessionStorage.getItem('sb_key');
-  if (k) { document.getElementById('keyInput').value = k; doLogin(); }
-})();
-
 let profiles = [], activities = [], checkins = [];
+
+const aProfile = createSelect({ label: 'User', placeholder: 'Pick a user' });
+const aTitle = createSelect({ options: EVENT_TITLES, value: EVENT_TITLES[0], label: 'Title' });
+const cActivity = createSelect({ label: 'Activity', placeholder: 'Pick an activity' });
+const cDate = createDatePicker({ label: 'Date' });
+const cIn = createTimeInput({ value: hhmm(new Date()), label: 'Check-in time' });
+const cOut = createTimeInput({ optional: true, label: 'Check-out time' });
+$('aProfile').append(aProfile.el);
+$('aTitle').append(aTitle.el);
+$('cActivity').append(cActivity.el);
+$('cDate').append(cDate.el);
+$('cIn').append(cIn.el);
+$('cOut').append(cOut.el);
+
+// What the app's login accepts (login.tsx / otp.tsx). Empty phone/password = that user can't log in.
+const RULES = {
+  name: (v) => (v ? null : 'Name is required'),
+  member_id: (v) => (/^\d+$/.test(v) ? null : 'Member ID must be digits only'),
+  phone: (v) => (!v || /^\d{10}$/.test(v) ? null : 'Phone must be 10 digits'),
+  password: (v) => (!v || /^\d{6}$/.test(v) ? null : 'Password must be 6 digits'),
+  title: (v) => (v ? null : 'Title is required'),
+};
+
+/** Postgres errors in plain words. */
+function friendly(error) {
+  if (error.code === '23505') {
+    if (error.message.includes('phone')) return 'Another user already has this phone number';
+    if (error.message.includes('member_id')) return 'Another user already has this member ID';
+  }
+  return error.message;
+}
+
+setupLogin((client) => {
+  sb = client;
+  loadAll();
+});
 
 async function loadAll() {
   await loadProfiles();
@@ -328,224 +157,204 @@ async function loadAll() {
   await loadCheckins();
 }
 
-// ─── PROFILES ───
+const empty = (text) => `<div class="empty">${text}</div>`;
+const deleteButton = (id, what) =>
+  `<button type="button" class="btn btn-ghost btn-sm btn-icon danger" data-delete="${what}" data-id="${id}" aria-label="Delete">${icon('trash')}</button>`;
+const editable = (table, id, field, value, width) =>
+  `<input class="input input-sm" data-table="${table}" data-id="${id}" data-field="${field}" data-saved="${esc(value)}"
+    value="${esc(value)}" style="width: ${width};"${field === 'phone' || field === 'password' ? ' inputmode="numeric"' : ''} />`;
+
+// ─── USERS ───
+
 async function loadProfiles() {
   const { data, error } = await sb.from('profiles').select('*').order('id');
   if (error) { toast(error.message, 'error'); return; }
-  profiles = data || [];
-  renderProfiles();
+  profiles = data;
+  $('profilesTable').innerHTML = profiles.length
+    ? `<table class="table">
+        <thead><tr><th>ID</th><th>Name</th><th>Member ID</th><th>Phone</th><th>Password</th><th class="actions"></th></tr></thead>
+        <tbody>${profiles.map((p) => `
+          <tr>
+            <td class="text-muted tabular">${p.id}</td>
+            <td>${editable('profiles', p.id, 'name', p.name, '100%')}</td>
+            <td><span class="badge badge-secondary tabular">${esc(p.member_id)}</span></td>
+            <td>${editable('profiles', p.id, 'phone', p.phone, '130px')}</td>
+            <td>${editable('profiles', p.id, 'password', p.password, '110px')}</td>
+            <td class="actions">${deleteButton(p.id, 'profile')}</td>
+          </tr>`).join('')}</tbody>
+      </table>`
+    : empty('No users yet');
+  aProfile.options = profiles.map((p) => ({ value: p.id, label: `${p.name} (${p.member_id})` }));
 }
 
-function renderProfiles() {
-  if (!profiles.length) { document.getElementById('profilesTable').innerHTML = '<div class="empty">No users yet</div>'; return; }
-  let html = '<table><tr><th>ID</th><th>Name</th><th>Member ID</th><th>Phone</th><th>Password</th><th>Actions</th></tr>';
-  profiles.forEach(p => {
-    html += `<tr>
-      <td>${p.id}</td>
-      <td><input value="${esc(p.name)}" onchange="updateProfile(${p.id},'name',this.value)" style="border:1px solid #eee;padding:4px 8px;border-radius:6px;width:100%;" /></td>
-      <td><span class="badge badge-purple">${esc(p.member_id)}</span></td>
-      <td><input value="${esc(p.phone||'')}" onchange="updateProfile(${p.id},'phone',this.value)" style="border:1px solid #eee;padding:4px 8px;border-radius:6px;width:120px;" /></td>
-      <td><input value="${esc(p.password||'')}" onchange="updateProfile(${p.id},'password',this.value)" style="border:1px solid #eee;padding:4px 8px;border-radius:6px;width:100px;" /></td>
-      <td><button class="btn btn-danger btn-sm" onclick="deleteProfile(${p.id})">Delete</button></td>
-    </tr>`;
-  });
-  html += '</table>';
-  document.getElementById('profilesTable').innerHTML = html;
-}
-
-function showAddProfile() { document.getElementById('addProfileForm').style.display = 'block'; }
-function hideAddProfile() { document.getElementById('addProfileForm').style.display = 'none'; }
-
-async function saveProfile() {
-  const name = document.getElementById('pName').value.trim();
-  const member_id = document.getElementById('pMemberId').value.trim();
-  const phone = document.getElementById('pPhone').value.trim() || null;
-  const password = document.getElementById('pPassword').value.trim() || null;
-  if (!name || !member_id) { toast('Name and Member ID required', 'error'); return; }
+$('addProfileForm').onsubmit = async (e) => {
+  e.preventDefault();
+  const name = $('pName').value.trim();
+  const member_id = $('pMemberId').value.trim();
+  const phone = normalizePhone($('pPhone').value) || null;
+  const password = $('pPassword').value.trim() || null;
+  const problem = RULES.name(name) ?? RULES.member_id(member_id) ?? RULES.phone(phone ?? '') ?? RULES.password(password ?? '');
+  if (problem) { toast(problem, 'error'); return; }
   const { error } = await sb.from('profiles').insert({ name, member_id, phone, password });
-  if (error) { toast(error.message, 'error'); return; }
-  toast('User added!', 'success');
-  hideAddProfile();
-  ['pName','pMemberId','pPhone','pPassword'].forEach(id => document.getElementById(id).value = '');
+  if (error) { toast(friendly(error), 'error'); return; }
+  toast('User added');
+  ['pName', 'pMemberId', 'pPhone', 'pPassword'].forEach((id) => { $(id).value = ''; });
+  $('addProfileForm').hidden = true;
   loadProfiles();
-}
-
-async function updateProfile(id, field, value) {
-  const { error } = await sb.from('profiles').update({ [field]: value || null }).eq('id', id);
-  if (error) toast(error.message, 'error');
-  else toast('Updated', 'success');
-}
-
-async function deleteProfile(id) {
-  if (!confirm('Delete this user and all their activities?')) return;
-  // Delete child rows first
-  const acts = activities.filter(a => a.profile_id === id);
-  for (const a of acts) {
-    await sb.from('journey_check_ins').delete().eq('activity_id', a.id);
-  }
-  await sb.from('journey_activities').delete().eq('profile_id', id);
-  const { error } = await sb.from('profiles').delete().eq('id', id);
-  if (error) { toast(error.message, 'error'); return; }
-  toast('User deleted', 'success');
-  loadAll();
-}
+};
 
 // ─── ACTIVITIES ───
+
 async function loadActivities() {
   const { data, error } = await sb.from('journey_activities').select('*, profiles(name)').order('id');
   if (error) { toast(error.message, 'error'); return; }
-  activities = data || [];
-  renderActivities();
-  populateActivityDropdowns();
+  activities = data;
+  $('activitiesTable').innerHTML = activities.length
+    ? `<table class="table">
+        <thead><tr><th>ID</th><th>User</th><th>Title</th><th>Created</th><th class="actions"></th></tr></thead>
+        <tbody>${activities.map((a) => `
+          <tr>
+            <td class="text-muted tabular">${a.id}</td>
+            <td><span class="badge badge-outline">${esc(a.profiles?.name ?? '?')}</span></td>
+            <td>${editable('journey_activities', a.id, 'title', a.title, '100%')}</td>
+            <td class="text-muted tabular">${new Date(a.created_at).toLocaleDateString()}</td>
+            <td class="actions">${deleteButton(a.id, 'activity')}</td>
+          </tr>`).join('')}</tbody>
+      </table>`
+    : empty('No activities yet');
+  cActivity.options = activities.map((a) => ({ value: a.id, label: `${a.title} · ${a.profiles?.name ?? '?'}` }));
 }
 
-function renderActivities() {
-  if (!activities.length) { document.getElementById('activitiesTable').innerHTML = '<div class="empty">No activities yet</div>'; return; }
-  let html = '<table><tr><th>ID</th><th>User</th><th>Title</th><th>Created</th><th>Actions</th></tr>';
-  activities.forEach(a => {
-    const userName = a.profiles ? a.profiles.name : '?';
-    html += `<tr>
-      <td>${a.id}</td>
-      <td><span class="badge badge-green">${esc(userName)}</span></td>
-      <td><input value="${esc(a.title)}" onchange="updateActivity(${a.id},'title',this.value)" style="border:1px solid #eee;padding:4px 8px;border-radius:6px;width:100%;" /></td>
-      <td style="color:var(--text-light);font-size:12px;">${new Date(a.created_at).toLocaleDateString()}</td>
-      <td><button class="btn btn-danger btn-sm" onclick="deleteActivity(${a.id})">Delete</button></td>
-    </tr>`;
-  });
-  html += '</table>';
-  document.getElementById('activitiesTable').innerHTML = html;
-}
-
-function showAddActivity() {
-  populateProfileDropdown();
-  document.getElementById('addActivityForm').style.display = 'block';
-}
-function hideAddActivity() { document.getElementById('addActivityForm').style.display = 'none'; }
-
-function populateProfileDropdown() {
-  const sel = document.getElementById('aProfileId');
-  sel.innerHTML = profiles.map(p => `<option value="${p.id}">${esc(p.name)} (${esc(p.member_id)})</option>`).join('');
-}
-
-async function saveActivity() {
-  const profile_id = parseInt(document.getElementById('aProfileId').value);
-  const title = document.getElementById('aTitle').value.trim();
-  if (!title) { toast('Title required', 'error'); return; }
+$('addActivityForm').onsubmit = async (e) => {
+  e.preventDefault();
+  const profile_id = Number(aProfile.value);
+  const title = aTitle.value;
+  if (!profile_id) { toast('Add a user first', 'error'); return; }
   const { error } = await sb.from('journey_activities').insert({ profile_id, title });
   if (error) { toast(error.message, 'error'); return; }
-  toast('Activity added!', 'success');
-  hideAddActivity();
-  document.getElementById('aTitle').value = '';
+  toast('Activity added');
+  $('addActivityForm').hidden = true;
   loadActivities();
-}
-
-async function updateActivity(id, field, value) {
-  const { error } = await sb.from('journey_activities').update({ [field]: value }).eq('id', id);
-  if (error) toast(error.message, 'error');
-  else toast('Updated', 'success');
-}
-
-async function deleteActivity(id) {
-  if (!confirm('Delete this activity and all its check-ins?')) return;
-  await sb.from('journey_check_ins').delete().eq('activity_id', id);
-  const { error } = await sb.from('journey_activities').delete().eq('id', id);
-  if (error) { toast(error.message, 'error'); return; }
-  toast('Activity deleted', 'success');
-  loadAll();
-}
+};
 
 // ─── CHECK-INS ───
+
 async function loadCheckins() {
-  const { data, error } = await sb.from('journey_check_ins').select('*, journey_activities(title)').order('id', { ascending: false });
+  const { data, error } = await sb
+    .from('journey_check_ins')
+    .select('*, journey_activities(title, profiles(name))')
+    .order('id', { ascending: false });
   if (error) { toast(error.message, 'error'); return; }
-  checkins = data || [];
-  renderCheckins();
+  checkins = data;
+  $('checkinsTable').innerHTML = checkins.length
+    ? `<table class="table">
+        <thead><tr><th>ID</th><th>Activity</th><th>User</th><th>Check-in</th><th>Check-out</th><th>Duration</th><th class="actions"></th></tr></thead>
+        <tbody>${checkins.map((c) => {
+          const inMs = Date.parse(c.check_in_at);
+          const outMs = c.check_out_at ? Date.parse(c.check_out_at) : null;
+          return `
+          <tr>
+            <td class="text-muted tabular">${c.id}</td>
+            <td>${esc(c.journey_activities?.title ?? '?')}</td>
+            <td><span class="badge badge-outline">${esc(c.journey_activities?.profiles?.name ?? '?')}</span></td>
+            <td class="tabular">${new Date(inMs).toLocaleString()}</td>
+            <td class="tabular">${outMs === null ? '<span class="badge badge-destructive">Not checked out</span>' : new Date(outMs).toLocaleString()}</td>
+            <td class="tabular">${outMs === null ? '—' : fmtDuration(outMs - inMs)}</td>
+            <td class="actions">${deleteButton(c.id, 'checkin')}</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>`
+    : empty('No check-ins yet');
 }
 
-function renderCheckins() {
-  if (!checkins.length) { document.getElementById('checkinsTable').innerHTML = '<div class="empty">No check-ins yet</div>'; return; }
-  let html = '<table><tr><th>ID</th><th>Activity</th><th>Check-in</th><th>Check-out</th><th>Location</th><th>Actions</th></tr>';
-  checkins.forEach(c => {
-    const actName = c.journey_activities ? c.journey_activities.title : '?';
-    const cin = c.check_in_at ? new Date(c.check_in_at).toLocaleString() : '';
-    const cout = c.check_out_at ? new Date(c.check_out_at).toLocaleString() : '—';
-    html += `<tr>
-      <td>${c.id}</td>
-      <td style="max-width:200px;"><span class="badge badge-purple" style="font-size:10px;">${esc(actName).substring(0,40)}</span></td>
-      <td style="font-size:12px;">${cin}</td>
-      <td style="font-size:12px;">${cout}</td>
-      <td><input value="${esc(c.location||'')}" onchange="updateCheckin(${c.id},'location',this.value)" style="border:1px solid #eee;padding:4px 8px;border-radius:6px;width:120px;" /></td>
-      <td><button class="btn btn-danger btn-sm" onclick="deleteCheckin(${c.id})">Delete</button></td>
-    </tr>`;
-  });
-  html += '</table>';
-  document.getElementById('checkinsTable').innerHTML = html;
-}
-
-function populateActivityDropdowns() {
-  const sel = document.getElementById('cActivityId');
-  sel.innerHTML = activities.map(a => `<option value="${a.id}">${esc(a.title).substring(0,50)}</option>`).join('');
-}
-
-function showAddCheckin() {
-  const now = new Date();
-  const local = new Date(now - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
-  document.getElementById('cCheckIn').value = local;
-  document.getElementById('addCheckinForm').style.display = 'block';
-}
-function hideAddCheckin() { document.getElementById('addCheckinForm').style.display = 'none'; }
-
-async function saveCheckin() {
-  const activity_id = parseInt(document.getElementById('cActivityId').value);
-  const check_in_at = document.getElementById('cCheckIn').value;
-  const check_out_at = document.getElementById('cCheckOut').value || null;
-  const location = document.getElementById('cLocation').value.trim();
-  if (!check_in_at) { toast('Check-in time required', 'error'); return; }
-  const row = { activity_id, check_in_at: new Date(check_in_at).toISOString(), location };
-  if (check_out_at) row.check_out_at = new Date(check_out_at).toISOString();
+$('addCheckinForm').onsubmit = async (e) => {
+  e.preventDefault();
+  const activity_id = Number(cActivity.value);
+  if (!activity_id) { toast('Add an activity first', 'error'); return; }
+  if (!cIn.value) { toast('Check-in time is required', 'error'); return; }
+  const inMs = atTime(cDate.value, cIn.value);
+  const outMs = cOut.value ? atTime(cDate.value, cOut.value) : null;
+  if (outMs !== null && outMs <= inMs) { toast('Check-out must be after check-in', 'error'); return; }
+  const row = { activity_id, check_in_at: new Date(inMs).toISOString() };
+  if (outMs !== null) row.check_out_at = new Date(outMs).toISOString();
   const { error } = await sb.from('journey_check_ins').insert(row);
   if (error) { toast(error.message, 'error'); return; }
-  toast('Check-in added!', 'success');
-  hideAddCheckin();
-  document.getElementById('cLocation').value = '';
-  document.getElementById('cCheckOut').value = '';
+  toast('Check-in added');
+  cOut.value = '';
+  $('addCheckinForm').hidden = true;
   loadCheckins();
-}
+};
 
-async function updateCheckin(id, field, value) {
-  const { error } = await sb.from('journey_check_ins').update({ [field]: value || null }).eq('id', id);
-  if (error) toast(error.message, 'error');
-  else toast('Updated', 'success');
-}
+// ─── SHARED ACTIONS ───
 
-async function deleteCheckin(id) {
-  if (!confirm('Delete this check-in?')) return;
-  const { error } = await sb.from('journey_check_ins').delete().eq('id', id);
+// Phone fields clean themselves as you type or paste (country code, spaces and dashes removed).
+document.addEventListener('input', (e) => {
+  if (!e.target.matches('#pPhone, [data-field=phone]')) return;
+  const clean = normalizePhone(e.target.value);
+  if (e.target.value !== clean) e.target.value = clean;
+});
+
+// Inline edits save on change.
+document.addEventListener('change', async (e) => {
+  const { table, id, field } = e.target.dataset;
+  if (!table) return;
+  const input = e.target;
+  const value = input.value.trim();
+  const problem = RULES[field]?.(value);
+  if (problem) { toast(problem, 'error'); input.value = input.dataset.saved; return; }
+  const { error } = await sb.from(table).update({ [field]: value || null }).eq('id', Number(id));
+  if (error) { toast(friendly(error), 'error'); input.value = input.dataset.saved; return; }
+  input.dataset.saved = value;
+  toast('Saved');
+});
+
+const DELETES = {
+  profile: {
+    title: 'Delete this user?',
+    description: 'Their activities and check-ins are deleted too. This can\'t be undone.',
+    run: (id) => sb.from('profiles').delete().eq('id', id),
+  },
+  activity: {
+    title: 'Delete this activity?',
+    description: 'Its check-ins are deleted too. This can\'t be undone.',
+    run: (id) => sb.from('journey_activities').delete().eq('id', id),
+  },
+  checkin: {
+    title: 'Delete this check-in?',
+    description: 'This can\'t be undone.',
+    run: (id) => sb.from('journey_check_ins').delete().eq('id', id),
+  },
+};
+
+document.addEventListener('click', async (e) => {
+  // Add-form toggles
+  const toggle = e.target.closest('[data-toggle]');
+  if (toggle) {
+    const form = $(toggle.dataset.toggle);
+    form.hidden = !form.hidden;
+    return;
+  }
+
+  // Tabs
+  const tab = e.target.closest('[data-tab]');
+  if (tab) {
+    document.querySelectorAll('[data-tab]').forEach((t) => {
+      t.setAttribute('aria-selected', t === tab);
+      $('panel-' + t.dataset.tab).hidden = t !== tab;
+    });
+    return;
+  }
+
+  // Deletes
+  const del = e.target.closest('[data-delete]');
+  if (!del) return;
+  const kind = DELETES[del.dataset.delete];
+  if (!(await confirmDialog(kind))) return;
+  const { error } = await kind.run(Number(del.dataset.id));
   if (error) { toast(error.message, 'error'); return; }
-  toast('Deleted', 'success');
-  loadCheckins();
-}
-
-// ─── UI HELPERS ───
-function switchTab(name, tab) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-  tab.classList.add('active');
-  document.getElementById('panel-' + name).classList.add('active');
-}
-
-function toast(msg, type) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'toast ' + type;
-  el.style.display = 'block';
-  setTimeout(() => { el.style.display = 'none'; }, 2500);
-}
-
-// Also escapes quotes: values are put inside value="..." attributes.
-function esc(s) {
-  return String(s ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
-}
+  toast('Deleted');
+  loadAll();
+});
 </script>
 </body>
 </html>

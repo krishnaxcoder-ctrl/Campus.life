@@ -5,6 +5,7 @@ export const Img = {
   postBeach2: require('@/assets/images/cl/post-beach-2.png'),
   postBeach3: require('@/assets/images/cl/post-beach-3.png'),
   postBeach4: require('@/assets/images/cl/post-beach-4.png'),
+  postBeach5: require('@/assets/images/cl/post-beach-5.png'),
   avatarPlaceholder: require('@/assets/images/cl/avatar-placeholder.png'),
   avatarSanjan: require('@/assets/images/cl/avatar-sanjan.png'),
   avatarSanjanLarge: require('@/assets/images/cl/avatar-sanjan-large.png'),
@@ -78,6 +79,14 @@ export const Img = {
     require('@/assets/images/cl/myevent-4.png'),
     require('@/assets/images/cl/myevent-5.png'),
   ],
+  // Banner of each My Events page (also cropped for the Event Info hero and thumbnail).
+  myEventHeroes: [
+    require('@/assets/images/cl/myevent-hero-1.png'),
+    require('@/assets/images/cl/myevent-hero-2.png'),
+    require('@/assets/images/cl/myevent-hero-3.png'),
+    require('@/assets/images/cl/myevent-hero-4.png'),
+    require('@/assets/images/cl/myevent-hero-5.png'),
+  ],
 } as const;
 
 // Tintable white masks.
@@ -95,6 +104,18 @@ export const Mask = {
   navCampus: require('@/assets/images/cl/nav-campus.png'),
   navPeople: require('@/assets/images/cl/nav-people.png'),
   navMenu: require('@/assets/images/cl/nav-menu.png'),
+  event: {
+    info: require('@/assets/images/cl/ic-event-info.png'),
+    checkIn: require('@/assets/images/cl/ic-event-check-in.png'),
+    checkOut: require('@/assets/images/cl/ic-event-check-out.png'),
+    photos: require('@/assets/images/cl/ic-event-photos.png'),
+    invite: require('@/assets/images/cl/ic-event-invite.png'),
+    help: require('@/assets/images/cl/ic-event-help.png'),
+    upload: require('@/assets/images/cl/ic-event-upload.png'),
+    view: require('@/assets/images/cl/ic-event-view.png'),
+    photo: require('@/assets/images/cl/ic-event-photo.png'),
+    video: require('@/assets/images/cl/ic-event-video.png'),
+  },
 } as const;
 
 // Full-colour icons.

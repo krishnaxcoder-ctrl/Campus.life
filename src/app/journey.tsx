@@ -102,7 +102,6 @@ function CheckInBox({ index, c }: { index: number; c: CheckIn }) {
     ['CHECK-IN', c.checkIn],
     ['CHECK-OUT', c.checkOut],
     ['DURATION', c.duration],
-    ['LOCATION', c.location],
   ];
   return (
     <View style={styles.box}>

@@ -1,5 +1,3 @@
-import { Feather } from '@expo/vector-icons';
-import { router } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
 import {
   Animated,
@@ -16,11 +14,12 @@ import {
 
 import { MainBar, StatusFill } from '@/components/cl/app-bar';
 import { JoinCard } from '@/components/cl/join-card';
+import { PostCard } from '@/components/cl/post-card';
 import { ReportDialog } from '@/components/cl/report-dialog';
 import { T } from '@/components/cl/text';
 import { BAR_H, Colors, Fonts } from '@/constants/cl';
-import { Icon, Img, px } from '@/constants/cl-assets';
-import { POSTS, type Post, USERS } from '@/data/cl';
+import { Img, px } from '@/constants/cl-assets';
+import { POSTS } from '@/data/cl';
 
 const TABS_H = 49.9;
 const HEADER_H = BAR_H + TABS_H;
@@ -124,66 +123,6 @@ function FollowingFeed({ onScroll }: { onScroll: ScrollHandler }) {
   );
 }
 
-function PostCard({ post, onReport }: { post: Post; onReport: () => void }) {
-  const win = useWindowDimensions();
-  const [w, setW] = useState(win.width);
-  const col = w / 3;
-  const [open, setOpen] = useState(false);
-  const [liked, setLiked] = useState(false);
-  const user = USERS[post.user];
-  const ratio = post.photo === 'postBeach' ? 1080 / 613 : 727 / 413;
-  const openUser = () => router.push({ pathname: '/user/[id]', params: { id: post.user } });
-
-  return (
-    <View style={styles.post} onLayout={(e) => setW(e.nativeEvent.layout.width)}>
-      <View style={styles.postHead}>
-        <Pressable onPress={openUser} style={styles.avatarBox}>
-          <Image source={Img[user.avatar]} style={styles.avatar} />
-        </Pressable>
-        <T style={styles.name} numberOfLines={1} onPress={openUser}>
-          {user.name}
-        </T>
-        <T style={styles.activity} numberOfLines={1}>
-          {post.activity}
-        </T>
-        <T style={styles.date}>{post.date}</T>
-      </View>
-      <Image source={Img[post.photo]} style={{ width: w, height: w / ratio }} />
-      <T style={[styles.text, !post.long && styles.textShort]} numberOfLines={open || !post.long ? undefined : 2}>
-        {post.body}
-      </T>
-      {post.long && (
-        <View style={styles.chevronRow}>
-          <Pressable onPress={() => setOpen((v) => !v)} hitSlop={10} style={styles.chevron}>
-            <Feather name={open ? 'chevron-up' : 'chevron-down'} size={24} color={Colors.purple} />
-          </Pressable>
-        </View>
-      )}
-      <View style={styles.actions}>
-        {/* Three equal columns; content offset inside each column as in the original. */}
-        <Pressable style={[styles.action, { paddingLeft: col * 0.236 }]} onPress={() => setLiked((v) => !v)}>
-          <Image source={Icon.like} style={styles.likeIcon} />
-          <T style={styles.count} numberOfLines={1}>
-            {liked ? 1 : 0} <T style={styles.likeText}>Like</T>
-          </T>
-        </Pressable>
-        <Pressable style={[styles.action, { paddingLeft: col * 0.247 }]} onPress={() => router.push('/comments')}>
-          <Image source={Icon.comment} style={styles.commentIcon} />
-          <T style={[styles.count, { marginLeft: 13 }]} numberOfLines={1}>
-            0
-          </T>
-        </Pressable>
-        <Pressable style={[styles.action, { paddingLeft: col * 0.175 }]} onPress={onReport}>
-          <Image source={Icon.report} style={styles.reportIcon} />
-          <T style={styles.report} numberOfLines={1}>
-            Report
-          </T>
-        </Pressable>
-      </View>
-    </View>
-  );
-}
-
 function MyActivitiesFeed({ onPostActivity, onScroll }: { onPostActivity: () => void; onScroll: ScrollHandler }) {
   const win = useWindowDimensions();
   const [w, setW] = useState(win.width);
@@ -227,26 +166,6 @@ const styles = StyleSheet.create({
   indicator: { position: 'absolute', left: 0, right: 0, bottom: 0, height: 1.1, backgroundColor: Colors.purple },
   feed: { flex: 1, backgroundColor: Colors.feedBg },
   feedContent: { paddingTop: HEADER_H },
-
-  post: { backgroundColor: Colors.white, marginBottom: 10.5 },
-  postHead: { height: 68.9 },
-  avatarBox: { position: 'absolute', left: 16.8, top: 16.4 },
-  avatar: { width: px(117), height: px(117), borderRadius: px(117) / 2 },
-  name: { position: 'absolute', left: 71.8, right: 16, top: 13.3, fontFamily: Fonts.os6, fontSize: 14, color: '#111111' },
-  activity: { position: 'absolute', left: 71.8, right: 16, top: 33.8, fontFamily: Fonts.os6, fontSize: 10, color: '#111111' },
-  date: { position: 'absolute', left: 71.6, top: 50.5, fontFamily: Fonts.os4, fontSize: 10, color: '#8A8A8A' },
-  text: { marginTop: 20, marginHorizontal: 14, fontSize: 15, lineHeight: 19, color: '#222222' },
-  textShort: { marginBottom: 20.3 },
-  chevronRow: { height: 34 },
-  chevron: { position: 'absolute', right: 7.1, top: 6.8 },
-  actions: { height: 48.6, flexDirection: 'row', borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: '#CFE9E6' },
-  action: { flex: 1, flexDirection: 'row', alignItems: 'center', overflow: 'visible' },
-  likeIcon: { width: px(100), height: px(88) },
-  commentIcon: { width: px(94), height: px(88) },
-  reportIcon: { width: px(80), height: px(80) },
-  count: { marginLeft: 9, flexShrink: 0, fontSize: 13, color: '#111111' },
-  likeText: { fontFamily: Fonts.os4, fontSize: 10.2, color: '#111111' },
-  report: { marginLeft: 12.5, flexShrink: 0, fontFamily: Fonts.os4, fontSize: 12.3, color: '#111111' },
 
   clCard: { marginTop: 3, backgroundColor: Colors.white },
   clHead: { height: 63.7 },

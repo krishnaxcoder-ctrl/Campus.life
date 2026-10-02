@@ -4,404 +4,388 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Journey Admin</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --purple: #5109B5;
-    --grad-start: #667EEA;
-    --grad-end: #764BA2;
-    --text: #333333;
-    --muted: #888888;
-    --border: #EEEEEE;
-    --box: #F8F9FE;
-    --box-border: #E3E6F3;
-    --danger: #DC3545;
-    --success: #198754;
-  }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    min-height: 100vh;
-    font-family: 'Poppins', system-ui, sans-serif;
-    color: var(--text);
-    background: linear-gradient(135deg, var(--grad-start), var(--grad-end)) fixed;
-  }
-  [hidden] { display: none !important; }
-  button, input, select { font: inherit; }
-  button { cursor: pointer; border: none; border-radius: 8px; font-weight: 600; }
-  input, select { min-width: 0; padding: 7px 10px; border: 1.5px solid #E0E0E0; border-radius: 8px; background: #fff; color: var(--text); outline: none; }
-  input:focus, select:focus { border-color: var(--grad-start); }
-
-  .bar {
-    position: sticky; top: 0; z-index: 10;
-    display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
-    padding: 12px 16px; background: var(--purple); color: #fff;
-  }
-  .bar a { color: #fff; opacity: 0.85; text-decoration: none; font-size: 14px; }
-  .bar h1 { flex: 1; font-size: 18px; }
-  .bar select { max-width: 100%; }
-
-  main { max-width: 760px; margin: 0 auto; padding: 16px; }
-  .card { margin-bottom: 16px; padding: 16px; border-radius: 20px; background: #fff; }
-  .card h2 { margin-bottom: 12px; font-size: 22px; color: var(--purple); }
-
-  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 16px; }
-  .stat { padding: 18px 8px; border-radius: 20px; background: #fff; text-align: center; }
-  .stat b { display: block; font-size: 28px; line-height: 36px; }
-  .stat span { font-size: 13px; letter-spacing: 0.4px; color: var(--muted); }
-  .hint { margin: -4px 4px 16px; font-size: 13px; line-height: 19px; color: rgba(255,255,255,0.9); }
-
-  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-  .row input[type=text], .row input:not([type]) { flex: 1 1 180px; }
-  .num { width: 64px; }
-
-  .btn { padding: 8px 14px; background: var(--purple); color: #fff; }
-  .btn-light { padding: 6px 10px; background: #EFE1FE; color: var(--purple); font-size: 12px; }
-  .btn-danger { padding: 6px 10px; background: #FDECEE; color: var(--danger); font-size: 12px; }
-
-  .item { margin-top: 14px; border: 1.5px solid var(--border); border-radius: 16px; overflow: hidden; }
-  .item-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 14px; }
-  .item-head .title { flex: 1 1 220px; font-weight: 700; font-size: 16px; }
-  .pill { padding: 2px 8px; border-radius: 10px; background: #EFE1FE; color: var(--purple); font-size: 11px; font-weight: 600; white-space: nowrap; }
-  .dur { font-size: 14px; font-weight: 600; color: var(--muted); white-space: nowrap; }
-  .item-body { padding: 0 14px 14px; border-top: 1px solid var(--border); }
-  .quick { margin-top: 12px; font-size: 13px; color: var(--muted); }
-
-  .checkin { margin-top: 12px; padding: 12px; border: 1px solid var(--box-border); border-radius: 14px; background: var(--box); }
-  .checkin-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 8px; }
-  .checkin-head b { font-size: 12px; letter-spacing: 0.3px; color: var(--purple); }
-  .fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
-  .fields label { display: flex; flex-direction: column; gap: 3px; font-size: 11px; font-weight: 600; letter-spacing: 0.6px; color: #9E9E9E; }
-  .fields input { width: 100%; }
-  .open { color: var(--danger); }
-  .empty { padding: 20px; text-align: center; color: var(--muted); }
-
-  .login { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 16px; }
-  .login .card { width: 100%; max-width: 420px; padding: 32px; text-align: center; }
-  .login p { margin-bottom: 16px; font-size: 14px; color: var(--muted); }
-  .login input { width: 100%; margin-bottom: 12px; font-family: monospace; }
-  .login .btn { width: 100%; padding: 11px; }
-
-  #toast { position: fixed; right: 16px; bottom: 16px; z-index: 99; max-width: calc(100% - 32px); padding: 11px 18px; border-radius: 10px; color: #fff; font-size: 14px; font-weight: 600; }
-  #toast.success { background: var(--success); }
-  #toast.error { background: var(--danger); }
-</style>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="ui.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="shared.js"></script>
 </head>
 <body>
 
 <div id="login" class="login">
-  <div class="card">
-    <h2>Journey Admin</h2>
-    <p>Enter the Supabase service role key. The app's key is read-only, so edits need this one.</p>
-    <input type="password" id="keyInput" placeholder="Service role key" />
-    <button class="btn" id="connect">Connect</button>
-  </div>
+  <form id="loginForm" class="card">
+    <div class="card-header">
+      <div>
+        <h1 class="card-title">Campus.Life Admin</h1>
+        <p class="card-description">Enter the Supabase service role key. The app's own key is read-only.</p>
+      </div>
+    </div>
+    <div class="card-content">
+      <label class="label" for="keyInput">Service role key</label>
+      <input class="input" type="password" id="keyInput" autocomplete="off" />
+      <button class="btn" style="width: 100%; margin-top: 16px;">Connect</button>
+    </div>
+  </form>
 </div>
 
 <div id="app" hidden>
-  <header class="bar">
-    <a href="index.html">&larr; All tables</a>
-    <h1>Journey Admin</h1>
-    <select id="user" aria-label="User"></select>
+  <header class="site-header">
+    <div class="inner">
+      <span class="brand"><span class="brand-mark">CL</span><span class="brand-name">Campus.Life Admin</span></span>
+      <nav class="nav">
+        <a href="journey.html" aria-current="page">Journey</a>
+        <a href="index.html">All tables</a>
+      </nav>
+      <button type="button" class="btn btn-ghost btn-sm" id="disconnect" aria-label="Disconnect"><span data-icon="logOut"></span><span class="hide-sm">Disconnect</span></button>
+    </div>
   </header>
 
-  <main>
-    <section class="stats">
-      <div class="stat"><b id="total">–</b><span>TOTAL HOURS</span></div>
-      <div class="stat"><b id="count">–</b><span>ACTIVITIES</span></div>
-    </section>
-    <p class="hint">
-      Same numbers as My Volunteer Journey in the app. Total hours is the sum of finished check-ins,
-      so change it by adding hours or editing a duration. In the app, tap refresh to see changes.
-    </p>
+  <main class="container stack">
+    <div class="page-head">
+      <h1 class="page-title">Volunteer journey</h1>
+      <p class="page-desc">What My Volunteer Journey shows in the app. After a change, tap refresh in the app.</p>
+    </div>
 
     <section class="card">
-      <h2>Your Journey</h2>
-      <form id="addActivity" class="row">
-        <input id="newTitle" list="events" placeholder="Event title, e.g. Swach Bharat_Panambur_26/09/26" />
-        <button class="btn">Add event</button>
+      <div class="card-content">
+        <label class="label" id="userLabel">Member</label>
+        <div class="combobox" id="combobox">
+          <button type="button" class="btn btn-outline combobox-trigger" id="userButton"
+            aria-haspopup="listbox" aria-expanded="false" aria-labelledby="userLabel"></button>
+          <div class="popover" id="userPopover" hidden>
+            <div class="command-input-wrap">
+              <span data-icon="search"></span>
+              <input class="command-input" id="userSearch" placeholder="Search name or member ID..." aria-label="Search members" />
+            </div>
+            <div class="command-list" id="userList" role="listbox"></div>
+          </div>
+        </div>
+        <p class="field-hint">The app shows member 1844116 (EXPO_PUBLIC_MEMBER_ID in .env), or whoever logs in with OTP.</p>
+      </div>
+    </section>
+
+    <section class="grid grid-stats">
+      <div class="card stat">
+        <div class="card-header"><h2 class="card-title">Total hours</h2><span class="text-muted" data-icon="clock"></span></div>
+        <div class="card-content"><div class="stat-value tabular" id="total">–</div></div>
+      </div>
+      <div class="card stat">
+        <div class="card-header"><h2 class="card-title">Events</h2><span class="text-muted" data-icon="listChecks"></span></div>
+        <div class="card-content"><div class="stat-value tabular" id="count">–</div></div>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-header"><h2 class="card-title">Add check-in</h2></div>
+      <form class="card-content grid grid-form" id="addForm">
+        <div><span class="label">Event</span><div id="newEvent"></div></div>
+        <div><span class="label">Date</span><div id="newDate"></div></div>
+        <div><span class="label">Check-in</span><div id="newIn"></div></div>
+        <div><span class="label">Check-out</span><div id="newOut"></div><p class="field-hint">Empty = not checked out yet.</p></div>
+        <div class="row" style="grid-column: 1 / -1; justify-content: flex-end;">
+          <button class="btn"><span data-icon="plus"></span>Add check-in</button>
+        </div>
       </form>
-      <div id="list"></div>
+    </section>
+
+    <section class="card">
+      <div class="card-header">
+        <div>
+          <h2 class="card-title">Check-ins</h2>
+          <p class="card-description">Changes save as soon as you pick a new value.</p>
+        </div>
+      </div>
+      <div class="card-content flush"><div class="table-wrap" id="list"></div></div>
     </section>
   </main>
 </div>
 
-<!-- Event titles from My Events in the app (src/data/cl.ts). -->
-<datalist id="events">
-  <option value="Swach Bharat_Panambur_26/09/26">
-  <option value="Swach Bharat_Panambur_29/06/26">
-  <option value="Swach Bharat_Aids 2Nd Year_Beach Cleaning _Nitk">
-  <option value="Beach Cleaning_Aids">
-  <option value="Swach Bharat_Aids">
-</datalist>
-
-<div id="toast" hidden></div>
-
 <script>
-const SUPABASE_URL = 'https://jtcfcdqyzmixrsopyjgw.supabase.co';
+// EXPO_PUBLIC_MEMBER_ID in .env: the member the app shows until someone logs in.
+const APP_MEMBER_ID = '1844116';
 const $ = (id) => document.getElementById(id);
 let sb;
+let users = [];
 let userId = null;
-let activities = [];
+let activities = []; // this member's journey_activities (the app's events)
+let rows = []; // their check-ins, newest first
 
-// ─── LOGIN (shares the key with index.html) ───
+// Add check-in form fields
+const newEvent = createSelect({ options: EVENT_TITLES, value: EVENT_TITLES[0], label: 'Event' });
+const newDate = createDatePicker({ label: 'Date' });
+const newIn = createTimeInput({ value: hhmm(new Date()), label: 'Check-in time' });
+const newOut = createTimeInput({ optional: true, label: 'Check-out time' });
+$('newEvent').append(newEvent.el);
+$('newDate').append(newDate.el);
+$('newIn').append(newIn.el);
+$('newOut').append(newOut.el);
 
-// Catch the app's read-only key up front: with it, updates and deletes silently change nothing.
-function keyProblem(key) {
-  if (key.startsWith('sb_publishable_')) return 'That is the publishable key. Use the service role (secret) key.';
-  if (key.startsWith('eyJ')) {
-    try {
-      const role = JSON.parse(atob(key.split('.')[1].replace(/-/g, '+').replace(/_/g, '/'))).role;
-      if (role !== 'service_role') return `That key has the "${role}" role. Use the service role key.`;
-    } catch { return 'That key could not be read.'; }
-  }
-  return null;
-}
-
-async function connect(key) {
-  const problem = keyProblem(key);
-  if (problem) { toast(problem, 'error'); return; }
-  sb = supabase.createClient(SUPABASE_URL, key, { auth: { persistSession: false } });
-  const { data, error } = await sb.from('profiles').select('id, name, member_id').order('id');
-  if (error) { toast('Invalid key or connection failed', 'error'); return; }
-  sessionStorage.setItem('sb_key', key);
-  $('login').hidden = true;
-  $('app').hidden = false;
-
-  $('user').innerHTML = data.map((p) => `<option value="${p.id}">${esc(p.name)} (${esc(p.member_id)})</option>`).join('');
+setupLogin(async (client) => {
+  sb = client;
+  if (!(await loadUsers())) return;
+  // Last picked member, else the one the app shows.
   const saved = Number(localStorage.getItem('journey_admin_user'));
-  userId = data.some((p) => p.id === saved) ? saved : data[0]?.id ?? null;
-  if (userId !== null) $('user').value = userId;
-  load();
-}
+  const user = users.find((u) => u.id === saved) ?? users.find((u) => u.member_id === APP_MEMBER_ID) ?? users[0];
+  selectUser(user?.id ?? null);
+});
 
-$('connect').onclick = () => { const k = $('keyInput').value.trim(); if (k) connect(k); };
-$('keyInput').onkeydown = (e) => { if (e.key === 'Enter') $('connect').click(); };
-$('user').onchange = (e) => {
-  userId = Number(e.target.value);
-  localStorage.setItem('journey_admin_user', userId);
-  load();
-};
-{
-  const k = sessionStorage.getItem('sb_key');
-  if (k) { $('keyInput').value = k; connect(k); }
-}
+// ─── Member picker (shadcn Combobox) ───
 
-// ─── DATA ───
-
-async function load() {
-  if (userId === null) { render(); return; }
+async function loadUsers() {
   const { data, error } = await sb
-    .from('journey_activities')
-    .select('id, title, journey_check_ins(id, check_in_at, check_out_at, location)')
-    .eq('profile_id', userId);
-  if (error) { toast(error.message, 'error'); return; }
-  // Same order as the app: newest check-in first, activities by their latest check-in.
-  activities = data.map((a) => {
-    const checkIns = a.journey_check_ins
-      .map((c) => ({ ...c, in: Date.parse(c.check_in_at), out: c.check_out_at ? Date.parse(c.check_out_at) : null }))
-      .sort((x, y) => y.in - x.in);
-    const ms = checkIns.reduce((sum, c) => sum + (c.out === null ? 0 : c.out - c.in), 0);
-    return { id: a.id, title: a.title, checkIns, ms, latest: checkIns[0]?.in ?? 0 };
-  }).sort((x, y) => y.latest - x.latest);
-  render();
-}
-
-/** Runs a write and reloads. `.select()` makes a write that matched no rows visible instead of silently passing. */
-async function write(query, message) {
-  const { data, error } = await query.select();
+    .from('profiles')
+    .select('id, name, member_id, journey_activities(journey_check_ins(check_in_at, check_out_at))')
+    .order('id');
   if (error) { toast(error.message, 'error'); return false; }
-  if (!data?.length) { toast('Nothing was saved. Is this the service role key?', 'error'); return false; }
-  toast(message, 'success');
-  await load();
+  users = data.map((p) => ({
+    id: p.id,
+    name: p.name,
+    member_id: p.member_id,
+    ms: p.journey_activities
+      .flatMap((a) => a.journey_check_ins)
+      .reduce((sum, c) => sum + (c.check_out_at ? Date.parse(c.check_out_at) - Date.parse(c.check_in_at) : 0), 0),
+  }));
+  renderPicker();
   return true;
 }
 
-// ─── FORMATTING (matches src/data/user.ts) ───
-
-const pad = (n) => String(n).padStart(2, '0');
-const minutes = (ms) => Math.floor(ms / 60000);
-const fmtDuration = (ms) => `${Math.floor(minutes(ms) / 60)}h ${pad(minutes(ms) % 60)}m`;
-const fmtHours = (ms) => `${Math.floor(minutes(ms) / 60)}:${pad(minutes(ms) % 60)}`;
-
-/** ms -> value for <input type="datetime-local"> in local time. */
-const toLocal = (ms) => {
-  const d = new Date(ms);
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
-};
-const fromLocal = (v) => new Date(v).toISOString();
-
-function esc(s) {
-  return String(s ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[ch]);
+function selectUser(id) {
+  userId = id;
+  if (id !== null) localStorage.setItem('journey_admin_user', id);
+  openPicker(false);
+  renderPicker();
+  load();
 }
 
-// ─── RENDER ───
+const initials = (name) => name.trim().split(/\s+/).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+
+function userRow(u) {
+  return `
+    <span class="avatar">${esc(initials(u.name))}</span>
+    <span class="who">
+      <b>${esc(u.name)}</b>
+      <small>Member ${esc(u.member_id)} · ${fmtHours(u.ms)} hours</small>
+    </span>
+    ${u.member_id === APP_MEMBER_ID ? '<span class="badge badge-success">Shown in app</span>' : ''}`;
+}
+
+function renderPicker() {
+  const current = users.find((u) => u.id === userId);
+  $('userButton').innerHTML =
+    (current ? userRow(current) : '<span class="who"><b>No members yet</b><small>Add one under All tables</small></span>') +
+    `<span class="chevrons">${icon('chevronsUpDown')}</span>`;
+  const q = $('userSearch').value.trim().toLowerCase();
+  const list = users.filter((u) => !q || u.name.toLowerCase().includes(q) || u.member_id.includes(q));
+  $('userList').innerHTML = list.length
+    ? list.map((u, i) => `
+        <button type="button" class="command-item" role="option" data-user="${u.id}"
+          aria-selected="${u.id === userId}" data-active="${i === 0 && !!q}">
+          ${userRow(u)}${u.id === userId ? `<span class="check">${icon('check')}</span>` : ''}
+        </button>`).join('')
+    : '<div class="command-empty">No member found.</div>';
+}
+
+function openPicker(open) {
+  $('userPopover').hidden = !open;
+  $('userButton').setAttribute('aria-expanded', open);
+  if (open) {
+    $('userSearch').value = '';
+    renderPicker();
+    $('userSearch').focus();
+  }
+}
+
+$('userButton').onclick = () => openPicker($('userPopover').hidden);
+$('userSearch').oninput = renderPicker;
+$('userSearch').onkeydown = (e) => {
+  const items = [...$('userList').querySelectorAll('[data-user]')];
+  const at = items.findIndex((el) => el.dataset.active === 'true');
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    const next = (at + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+    items.forEach((el, i) => { el.dataset.active = i === next; });
+    items[next]?.scrollIntoView({ block: 'nearest' });
+  } else if (e.key === 'Enter') {
+    (items[at] ?? items[0])?.click();
+  }
+};
+$('userList').onclick = (e) => {
+  const item = e.target.closest('[data-user]');
+  if (item) selectUser(Number(item.dataset.user));
+};
+document.addEventListener('click', (e) => { if (!$('combobox').contains(e.target)) openPicker(false); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') openPicker(false); });
+
+// ─── Check-ins ───
+
+async function load() {
+  if (userId === null) { activities = []; rows = []; render(); return; }
+  const { data, error } = await sb
+    .from('journey_activities')
+    .select('id, title, journey_check_ins(id, check_in_at, check_out_at)')
+    .eq('profile_id', userId);
+  if (error) { toast(error.message, 'error'); return; }
+  activities = data;
+  rows = data
+    .flatMap((a) => a.journey_check_ins.map((c) => ({
+      id: c.id,
+      activityId: a.id,
+      title: a.title,
+      in: Date.parse(c.check_in_at),
+      out: c.check_out_at ? Date.parse(c.check_out_at) : null,
+    })))
+    .sort((x, y) => y.in - x.in);
+  render();
+}
+
+/** My Events titles, plus any other title this member already has. */
+function eventTitles() {
+  return [...new Set([...EVENT_TITLES, ...activities.map((a) => a.title)])];
+}
 
 function render() {
-  const total = activities.reduce((sum, a) => sum + a.ms, 0);
+  const total = rows.reduce((sum, r) => sum + (r.out === null ? 0 : r.out - r.in), 0);
   $('total').textContent = fmtHours(total);
   $('count').textContent = activities.length;
-  $('list').innerHTML = activities.length
-    ? activities.map(renderActivity).join('')
-    : '<div class="empty">No events yet. Add one above.</div>';
+  newEvent.options = eventTitles();
+
+  const name = users.find((u) => u.id === userId)?.name;
+  $('list').innerHTML = rows.length
+    ? `<table class="table stack-sm">
+        <thead><tr><th>Event</th><th>Date</th><th>Check-in</th><th>Check-out</th><th>Duration</th><th class="actions"></th></tr></thead>
+        <tbody>${rows.map((r) => `
+          <tr data-row="${r.id}">
+            <td class="wide" data-label="Event" data-cell="event" style="min-width: 220px; max-width: 320px;"></td>
+            <td data-label="Date" data-cell="date"></td>
+            <td data-label="Check-in" data-cell="in"></td>
+            <td data-label="Check-out"><div class="datetime" data-cell="out">${outDays(r) > 0 ? `<span class="badge badge-secondary">+${outDays(r)} day</span>` : ''}</div></td>
+            <td class="tabular" data-label="Duration">${r.out === null ? '<span class="badge badge-destructive">Not checked out</span>' : fmtDuration(r.out - r.in)}</td>
+            <td class="actions"><button type="button" class="btn btn-ghost btn-sm btn-icon danger" data-action="delete" aria-label="Delete check-in">${icon('trash')}</button></td>
+          </tr>`).join('')}
+        </tbody>
+      </table>`
+    : `<div class="empty">${name ? `${esc(name)} has no check-ins yet.` : 'No member selected.'}</div>`;
+
+  // Each row edits in place and saves on change.
+  $('list').querySelectorAll('[data-row]').forEach((tr) => {
+    const r = rows.find((x) => x.id === Number(tr.dataset.row));
+    const cell = (name) => tr.querySelector(`[data-cell=${name}]`);
+    cell('event').append(createSelect({ options: eventTitles(), value: r.title, label: 'Event', small: true, onChange: (v) => save(r, 'event', v) }).el);
+    cell('date').append(createDatePicker({ value: r.in, label: 'Date', small: true, onChange: (ms) => save(r, 'date', ms) }).el);
+    cell('in').append(createTimeInput({ value: hhmm(new Date(r.in)), label: 'Check-in time', small: true, onChange: (t) => save(r, 'in', t) }).el);
+    cell('out').prepend(createTimeInput({
+      value: r.out === null ? '' : hhmm(new Date(r.out)),
+      optional: true,
+      label: 'Check-out time',
+      small: true,
+      onChange: (t) => save(r, 'out', t),
+    }).el);
+  });
 }
 
-function renderActivity(a) {
-  return `
-    <div class="item" data-activity="${a.id}">
-      <div class="item-head">
-        <input class="title" data-field="title" value="${esc(a.title)}" aria-label="Event title" />
-        <span class="pill">${a.checkIns.length} check-ins</span>
-        <span class="dur">${fmtDuration(a.ms)}</span>
-        <button class="btn-danger" data-action="delete-activity">Delete event</button>
-      </div>
-      <div class="item-body">
-        <form class="row quick" data-action="add-hours">
-          Add
-          <input class="num" type="number" min="0" name="h" placeholder="h" aria-label="Hours" /> h
-          <input class="num" type="number" min="0" max="59" name="m" placeholder="m" aria-label="Minutes" /> m
-          <input name="location" placeholder="Location" />
-          <button class="btn">Add hours</button>
-          <button type="button" class="btn-light" data-action="check-in-now">Check in now</button>
-        </form>
-        ${a.checkIns.map((c, i) => renderCheckIn(c, i + 1)).join('')}
-      </div>
-    </div>`;
+/** Days between check-in and check-out; check-out is normally the same day (0). */
+const outDays = (r) => (r.out === null ? 0 : dayDiff(r.in, r.out));
+
+/** Runs a write. `.select()` makes a write that matched no rows an error instead of passing silently. */
+async function run(query) {
+  const { data, error } = await query.select();
+  if (error) { toast(error.message, 'error'); return null; }
+  if (!data?.length) { toast('Nothing was saved. Is this the service role key?', 'error'); return null; }
+  return data;
 }
 
-function renderCheckIn(c, n) {
-  const spent = c.out === null ? null : c.out - c.in;
-  const h = spent === null ? '' : Math.floor(minutes(spent) / 60);
-  const m = spent === null ? '' : minutes(spent) % 60;
-  return `
-    <div class="checkin" data-checkin="${c.id}">
-      <div class="checkin-head">
-        <b>CHECK-IN #${n}${c.out === null ? ' <span class="open">· not checked out</span>' : ''}</b>
-        <span class="row">
-          ${c.out === null ? '<button class="btn-light" data-action="check-out-now">Check out now</button>' : ''}
-          <button class="btn-danger" data-action="delete-checkin">Delete</button>
-        </span>
-      </div>
-      <div class="fields">
-        <label>CHECK-IN<input type="datetime-local" data-field="check_in_at" value="${toLocal(c.in)}" /></label>
-        <label>CHECK-OUT<input type="datetime-local" data-field="check_out_at" value="${c.out === null ? '' : toLocal(c.out)}" /></label>
-        <label>DURATION
-          <span class="row">
-            <input class="num" type="number" min="0" data-field="h" value="${h}" placeholder="h" aria-label="Hours" /> h
-            <input class="num" type="number" min="0" max="59" data-field="m" value="${m}" placeholder="m" aria-label="Minutes" /> m
-          </span>
-        </label>
-        <label>LOCATION<input data-field="location" value="${esc(c.location)}" /></label>
-      </div>
-    </div>`;
+const reload = () => Promise.all([load(), loadUsers()]);
+
+/** The member's activity with this title, created if it doesn't exist yet. */
+async function activityFor(title) {
+  const existing = activities.find((a) => a.title === title);
+  if (existing) return existing.id;
+  const data = await run(sb.from('journey_activities').insert({ profile_id: userId, title }));
+  return data?.[0].id ?? null;
 }
 
-// ─── EDITING ───
+/** An event without check-ins would still show in the app as "0 check-ins", so remove it. */
+async function dropIfEmpty(activityId) {
+  const { count } = await sb.from('journey_check_ins').select('id', { count: 'exact', head: true }).eq('activity_id', activityId);
+  if (count === 0) await sb.from('journey_activities').delete().eq('id', activityId);
+}
 
-const findActivity = (el) => activities.find((a) => a.id === Number(el.closest('[data-activity]')?.dataset.activity));
-const findCheckIn = (el) => {
-  const id = Number(el.closest('[data-checkin]')?.dataset.checkin);
-  return findActivity(el)?.checkIns.find((c) => c.id === id);
+/** Check-out (ms or null) must be after check-in. */
+function badTimes(inMs, outMs) {
+  if (inMs === null) return 'Check-in date and time are required';
+  if (outMs !== null && outMs <= inMs) return 'Check-out must be after check-in';
+  return null;
+}
+
+$('addForm').onsubmit = async (e) => {
+  e.preventDefault();
+  if (userId === null) return;
+  if (!newIn.value) { toast('Check-in time is required', 'error'); return; }
+  const inMs = atTime(newDate.value, newIn.value);
+  const outMs = newOut.value ? atTime(newDate.value, newOut.value) : null;
+  const problem = badTimes(inMs, outMs);
+  if (problem) { toast(problem, 'error'); return; }
+  const activityId = await activityFor(newEvent.value);
+  if (activityId === null) return;
+  const row = { activity_id: activityId, check_in_at: new Date(inMs).toISOString() };
+  if (outMs !== null) row.check_out_at = new Date(outMs).toISOString();
+  if (!(await run(sb.from('journey_check_ins').insert(row)))) return;
+  toast('Check-in added');
+  newIn.value = hhmm(new Date());
+  newOut.value = '';
+  await reload();
 };
 
-$('addActivity').onsubmit = async (e) => {
-  e.preventDefault();
-  const title = $('newTitle').value.trim();
-  if (!title) { toast('Enter an event title', 'error'); return; }
-  if (await write(sb.from('journey_activities').insert({ profile_id: userId, title }), 'Event added')) $('newTitle').value = '';
-};
-
-$('list').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const form = e.target;
-  const a = findActivity(form);
-  const mins = Number(form.h.value || 0) * 60 + Number(form.m.value || 0);
-  if (!a || mins <= 0) { toast('Enter hours or minutes to add', 'error'); return; }
-  // A finished check-in that ends now and lasts the given time.
-  const now = Date.now();
-  const row = {
-    activity_id: a.id,
-    check_in_at: new Date(now - mins * 60000).toISOString(),
-    check_out_at: new Date(now).toISOString(),
-    location: form.location.value.trim(),
-  };
-  await write(sb.from('journey_check_ins').insert(row), `Added ${fmtDuration(mins * 60000)}`);
-});
+/**
+ * Saves one changed field of a check-in row:
+ * 'event' (title), 'date' (ms of the new day; moves check-in and check-out together),
+ * 'in' or 'out' ('HH:MM', or '' for no check-out).
+ */
+async function save(r, field, value) {
+  let update;
+  if (field === 'event') {
+    const activityId = await activityFor(value);
+    if (activityId === null) { render(); return; }
+    update = { activity_id: activityId };
+  } else {
+    const days = outDays(r);
+    let inMs = r.in;
+    let outMs = r.out;
+    if (field === 'date') {
+      inMs = atTime(value, hhmm(new Date(r.in)));
+      if (r.out !== null) outMs = atTime(value, hhmm(new Date(r.out)), days);
+    } else if (field === 'in') {
+      inMs = atTime(r.in, value);
+    } else {
+      outMs = value ? atTime(r.in, value, days) : null;
+    }
+    const problem = badTimes(inMs, outMs);
+    if (problem) { toast(problem, 'error'); render(); return; }
+    update = {
+      check_in_at: new Date(inMs).toISOString(),
+      check_out_at: outMs === null ? null : new Date(outMs).toISOString(),
+    };
+  }
+  if (!(await run(sb.from('journey_check_ins').update(update).eq('id', r.id)))) { render(); return; }
+  if (field === 'event') await dropIfEmpty(r.activityId);
+  toast('Saved');
+  await reload();
+}
 
 $('list').addEventListener('click', async (e) => {
-  const action = e.target.dataset.action;
-  if (!action) return;
-  const a = findActivity(e.target);
-  if (!a) return;
-  if (action === 'delete-activity') {
-    if (!confirm(`Delete "${a.title}" and its ${a.checkIns.length} check-ins?`)) return;
-    const { error } = await sb.from('journey_check_ins').delete().eq('activity_id', a.id);
-    if (error) { toast(error.message, 'error'); return; }
-    await write(sb.from('journey_activities').delete().eq('id', a.id), 'Event deleted');
-  } else if (action === 'check-in-now') {
-    const location = e.target.form.location.value.trim();
-    await write(sb.from('journey_check_ins').insert({ activity_id: a.id, check_in_at: new Date().toISOString(), location }), 'Checked in');
-  } else if (action === 'check-out-now') {
-    const c = findCheckIn(e.target);
-    if (Date.now() <= c.in) { toast('Check-in is in the future', 'error'); return; }
-    await write(sb.from('journey_check_ins').update({ check_out_at: new Date().toISOString() }).eq('id', c.id), 'Checked out');
-  } else if (action === 'delete-checkin') {
-    if (!confirm('Delete this check-in?')) return;
-    await write(sb.from('journey_check_ins').delete().eq('id', findCheckIn(e.target).id), 'Check-in deleted');
-  }
+  if (!e.target.closest('[data-action=delete]')) return;
+  const r = rows.find((x) => x.id === Number(e.target.closest('[data-row]').dataset.row));
+  const ok = await confirmDialog({
+    title: 'Delete this check-in?',
+    description: `${r.title}, ${new Date(r.in).toLocaleString()}. This can't be undone.`,
+  });
+  if (!ok) return;
+  if (!(await run(sb.from('journey_check_ins').delete().eq('id', r.id)))) return;
+  await dropIfEmpty(r.activityId);
+  toast('Check-in deleted');
+  await reload();
 });
-
-$('list').addEventListener('change', async (e) => {
-  const field = e.target.dataset.field;
-  if (!field) return;
-  const a = findActivity(e.target);
-  if (!a) return;
-  const value = e.target.value.trim();
-
-  if (field === 'title') {
-    if (!value) { toast('Title cannot be empty', 'error'); e.target.value = a.title; return; }
-    await write(sb.from('journey_activities').update({ title: value }).eq('id', a.id), 'Title updated');
-    return;
-  }
-
-  const c = findCheckIn(e.target);
-  let update;
-  if (field === 'location') {
-    update = { location: value };
-  } else if (field === 'check_in_at') {
-    if (!value) { toast('Check-in time is required', 'error'); render(); return; }
-    // Moving the check-in keeps the duration, so total hours don't change unexpectedly.
-    const start = Date.parse(fromLocal(value));
-    update = { check_in_at: fromLocal(value) };
-    if (c.out !== null) update.check_out_at = new Date(start + (c.out - c.in)).toISOString();
-  } else if (field === 'check_out_at') {
-    if (value && Date.parse(fromLocal(value)) <= c.in) { toast('Check-out must be after check-in', 'error'); render(); return; }
-    update = { check_out_at: value ? fromLocal(value) : null };
-  } else {
-    // Duration (h or m): check-out = check-in + duration. Both empty = not checked out.
-    const box = e.target.closest('[data-checkin]');
-    const hv = box.querySelector('[data-field=h]').value;
-    const mv = box.querySelector('[data-field=m]').value;
-    const mins = Number(hv || 0) * 60 + Number(mv || 0);
-    if (hv === '' && mv === '') update = { check_out_at: null };
-    else if (mins <= 0) { toast('Duration must be more than 0', 'error'); render(); return; }
-    else update = { check_out_at: new Date(c.in + mins * 60000).toISOString() };
-  }
-  if (!(await write(sb.from('journey_check_ins').update(update).eq('id', c.id), 'Saved'))) render();
-});
-
-// ─── UI ───
-
-let toastTimer;
-function toast(msg, type) {
-  const el = $('toast');
-  el.textContent = msg;
-  el.className = type;
-  el.hidden = false;
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { el.hidden = true; }, 2600);
-}
 </script>
 </body>
 </html>

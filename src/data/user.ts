@@ -5,7 +5,7 @@ import { getMemberId, supabase } from '@/lib/supabase';
 
 export type Profile = { name: string; memberId: string };
 
-export type CheckIn = { checkIn: string; checkOut: string; duration: string; location: string };
+export type CheckIn = { checkIn: string; checkOut: string; duration: string };
 export type JourneyItem = { id: string; title: string; total: string; checkIns: CheckIn[] };
 export type Journey = { totalHours: string; items: JourneyItem[] };
 
@@ -22,7 +22,7 @@ async function fetchProfile(): Promise<Profile | null> {
 async function fetchJourney(): Promise<Journey> {
   const { data, error } = await supabase
     .from('profiles')
-    .select('journey_activities(id, title, journey_check_ins(check_in_at, check_out_at, location))')
+    .select('journey_activities(id, title, journey_check_ins(check_in_at, check_out_at))')
     .eq('member_id', getMemberId())
     .maybeSingle();
   if (error) throw error;
@@ -33,7 +33,6 @@ async function fetchJourney(): Promise<Journey> {
       .map((c) => ({
         in: Date.parse(c.check_in_at),
         out: c.check_out_at ? Date.parse(c.check_out_at) : null,
-        location: c.location,
       }))
       .sort((x, y) => y.in - x.in);
 
@@ -46,7 +45,6 @@ async function fetchJourney(): Promise<Journey> {
         checkIn: formatTime(c.in),
         checkOut: c.out === null ? 'Not checked out' : formatTime(c.out),
         duration: spent === null ? '—' : formatDuration(spent),
-        location: c.location,
       };
     });
     totalMs += ms;

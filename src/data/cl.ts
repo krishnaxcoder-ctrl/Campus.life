@@ -1,7 +1,7 @@
 // Content shown in the reference screenshots.
 import type { Img } from '@/constants/cl-assets';
 
-export type UserId = 'khalander' | 'sanjan' | 'srujan';
+export type UserId = 'khalander' | 'sanjan' | 'srujan' | 'shaikh';
 
 export type Person = {
   name: string;
@@ -24,16 +24,22 @@ export const USERS: Record<UserId, Person> = {
     avatar: 'avatarPlaceholder',
     photo: 'avatarImagePlaceholder',
   },
+  shaikh: { name: 'Shaikh Mohammad Uzaifat Hassan Abbas', avatar: 'avatarPlaceholder', photo: 'avatarImagePlaceholder' },
 };
+
+/** Photo or video picked on the Upload screen. */
+export type PickedMedia = { uri: string; type: 'image' | 'video'; width: number; height: number };
 
 export type Post = {
   id: string;
-  user: UserId;
+  // A person from the screenshots, or the author of a post written in this session.
+  user: UserId | Person;
   activity: string;
   date: string;
   body: string;
   // Photo crops from the screenshots; the "1/8"-style counter is part of the image.
-  photo: 'postBeach' | 'postBeach2' | 'postBeach3' | 'postBeach4';
+  photo?: 'postBeach' | 'postBeach2' | 'postBeach3' | 'postBeach4' | 'postBeach5';
+  media?: PickedMedia;
   // Body longer than 2 lines: shows the expand chevron.
   long?: boolean;
 };
@@ -180,13 +186,69 @@ export const UPCOMING_EVENTS: EventItem[] = [
   },
 ];
 
-export const MY_EVENTS = [
-  'Swach Bharat_Panambur_26/09/26',
-  'Swach Bharat_Panambur_29/06/26',
-  'Swach Bharat_Aids 2Nd Year_Beach Cleaning _Nitk',
-  'Beach Cleaning_Aids',
-  'Swach Bharat_Aids',
+export type MyEvent = {
+  id: string;
+  title: string;
+  status: 'Active' | 'Upcoming';
+  category: string;
+  institute: string;
+  starts: string;
+  ends: string;
+  about: string;
+  location: string;
+  address: string;
+  contact: string;
+  phone: string;
+  email: string;
+};
+
+// Event Info as shown for the first event. The screenshots only show the details of this one,
+// so the other events reuse its values with their own title.
+const PANAMBUR: Omit<MyEvent, 'id' | 'title' | 'about'> = {
+  status: 'Active',
+  category: 'Contributing to national initiatives such as Digital India, Skill India, Swachh Bharat Internship',
+  institute: 'A.j. Institute Of Engineering And Technology Mangaluru',
+  starts: '27-09-2026 07:00:00',
+  ends: '03-01-2027 17:00:00',
+  location: 'panambur beach',
+  address: 'panambur beach',
+  contact: '9353194826',
+  phone: '9353194826',
+  email: 'divyar@ajiet.edu.in',
+};
+
+const myEvent = (id: string, title: string): MyEvent => ({ ...PANAMBUR, id, title, about: title.toLowerCase() });
+
+// Same order as Img.myEvents / Img.myEventHeroes.
+export const MY_EVENTS: MyEvent[] = [
+  myEvent('1', 'Swach Bharat_Panambur_26/09/26'),
+  myEvent('2', 'Swach Bharat_Panambur_29/06/26'),
+  myEvent('3', 'Swach Bharat_Aids 2Nd Year_Beach Cleaning _Nitk'),
+  myEvent('4', 'Beach Cleaning_Aids'),
+  myEvent('5', 'Swach Bharat_Aids'),
 ];
+
+/** Event for a `[id]` route param, with its index into Img.myEvents / Img.myEventHeroes. */
+export function findMyEvent(id: string | undefined) {
+  const index = Math.max(0, MY_EVENTS.findIndex((e) => e.id === id));
+  return { event: MY_EVENTS[index], index };
+}
+
+// "View Posts" of the first event: one more post on top of the feed posts. Total in the app was 6/6;
+// the sixth post wasn't visible in the screenshots.
+export const EVENT_POSTS: Record<string, Post[]> = {
+  '1': [
+    {
+      id: 'p0',
+      user: 'shaikh',
+      activity: 'Beach cleaning',
+      date: '27 Sep 2026 05:44 PM',
+      body: 'We were cleaning the beach',
+      photo: 'postBeach5',
+    },
+    ...POSTS,
+  ],
+};
 
 export const PEOPLE = [
   'ABDUL FATHAH', 'Abhay RajB', 'ABHINAND K', 'ABHISHEK GR', 'ABHISHEK P', 'AFTAB HUSSAINSHAIK',

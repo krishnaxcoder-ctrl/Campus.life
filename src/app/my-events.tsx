@@ -1,3 +1,4 @@
+import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { BackBar } from '@/components/cl/app-bar';
@@ -14,12 +15,15 @@ export default function MyEvents() {
       <ScrollView>
         <Grid2
           items={MY_EVENTS}
-          keyOf={(name) => name}
+          keyOf={(e) => e.id}
           columnGap={21.4}
           rowGap={20.6}
           style={styles.grid}
-          renderItem={(name, i) => (
-            <Pressable accessibilityLabel={name} style={styles.tile}>
+          renderItem={(e, i) => (
+            <Pressable
+              accessibilityLabel={e.title}
+              onPress={() => router.push({ pathname: '/my-event/[id]', params: { id: e.id } })}
+              style={styles.tile}>
               <FitImage source={Img.myEvents[i]} ratio={467 / 418} />
             </Pressable>
           )}
