@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Campus.Life Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<style>
+  :root {
+    --purple: #5109B5;
+    --purple-light: #7B5AFF;
+    --bg: #F2F0F5;
+    --card: #FFFFFF;
+    --text: #333;
+    --text-light: #888;
+    --border: #E6E6E6;
+    --danger: #DC3545;
+    --success: #198754;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  .header {
+    background: var(--purple);
+    color: #fff;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header h1 { font-size: 20px; font-weight: 700; }
+  .header .status { font-size: 13px; opacity: 0.8; }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    border-bottom: 2px solid var(--border);
+    padding-bottom: 0;
+  }
+  .tab {
+    padding: 10px 20px;
+    border: none;
+    background: none;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-light);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+  }
+  .tab.active { color: var(--purple); border-bottom-color: var(--purple); }
+  .tab:hover { color: var(--purple-light); }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .card {
+    background: var(--card);
+    border-radius: 12px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .card-header h2 { font-size: 17px; color: var(--purple); }
+  .card-body { padding: 20px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th { text-align: left; padding: 10px 12px; background: #F8F7FA; color: var(--text-light); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 10px 12px; border-top: 1px solid var(--border); vertical-align: middle; }
+  tr:hover td { background: #FAFAFF; }
+
+  .btn {
+    padding: 7px 16px;
+    border: none;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .btn:hover { opacity: 0.85; }
+  .btn-primary { background: var(--purple); color: #fff; }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-success { background: var(--success); color: #fff; }
+  .btn-sm { padding: 5px 12px; font-size: 12px; }
+  .btn-group { display: flex; gap: 6px; }
+
+  .form-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+  .form-group { flex: 1; min-width: 180px; }
+  .form-group label { display: block; font-size: 12px; font-weight: 600; color: var(--text-light); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.3px; }
+  .form-group input, .form-group select {
+    width: 100%;
+    padding: 9px 12px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-group input:focus, .form-group select:focus { border-color: var(--purple-light); }
+
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .badge-purple { background: #EFE1FE; color: var(--purple); }
+  .badge-green { background: #D1F5E0; color: var(--success); }
+
+  .toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 12px 20px;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 999;
+    animation: slideIn 0.3s ease;
+    display: none;
+  }
+  .toast.success { background: var(--success); }
+  .toast.error { background: var(--danger); }
+  @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+  .empty { text-align: center; padding: 40px; color: var(--text-light); }
+
+  .login-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
+  .login-card {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 40px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+    width: 100%;
+    max-width: 420px;
+    text-align: center;
+  }
+  .login-card h1 { color: var(--purple); font-size: 24px; margin-bottom: 8px; }
+  .login-card p { color: var(--text-light); font-size: 14px; margin-bottom: 24px; }
+  .login-card input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-size: 14px;
+    margin-bottom: 16px;
+    font-family: monospace;
+    outline: none;
+  }
+  .login-card input:focus { border-color: var(--purple-light); }
+  .login-card .btn { width: 100%; padding: 12px; font-size: 16px; }
+
+  @media (max-width: 600px) {
+    .form-row { flex-direction: column; }
+    .form-group { min-width: 100%; }
+    table { font-size: 12px; }
+    th, td { padding: 8px 6px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Login Screen -->
+<div id="loginScreen" class="login-wrap">
+  <div class="login-card">
+    <h1>Campus.Life Admin</h1>
+    <p>Enter your Supabase Service Role Key to access the admin panel</p>
+    <input type="password" id="keyInput" placeholder="Service Role Key" />
+    <button class="btn btn-primary" onclick="doLogin()">Connect</button>
+  </div>
+</div>
+
+<!-- Main App -->
+<div id="app" style="display:none;">
+  <div class="header">
+    <h1>Campus.Life Admin</h1>
+    <span class="status" id="connStatus">Connected</span>
+  </div>
+
+  <div class="container">
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('profiles')">Users</button>
+      <button class="tab" onclick="switchTab('activities')">Activities</button>
+      <button class="tab" onclick="switchTab('checkins')">Check-ins</button>
+    </div>
+
+    <!-- PROFILES -->
+    <div id="panel-profiles" class="panel active">
+      <div class="card">
+        <div class="card-header">
+          <h2>Users / Profiles</h2>
+          <button class="btn btn-primary btn-sm" onclick="showAddProfile()">+ Add User</button>
+        </div>
+        <div class="card-body" id="addProfileForm" style="display:none; border-bottom: 1px solid var(--border);">
+          <div class="form-row">
+            <div class="form-group"><label>Name</label><input id="pName" placeholder="Full name" /></div>
+            <div class="form-group"><label>Member ID</label><input id="pMemberId" placeholder="e.g. 1844116" /></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Phone</label><input id="pPhone" placeholder="10-digit number" /></div>
+            <div class="form-group"><label>Password</label><input id="pPassword" placeholder="6-digit code" /></div>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-success btn-sm" onclick="saveProfile()">Save</button>
+            <button class="btn btn-sm" style="background:#eee;" onclick="hideAddProfile()">Cancel</button>
+          </div>
+        </div>
+        <div id="profilesTable"></div>
+      </div>
+    </div>
+
+    <!-- ACTIVITIES -->
+    <div id="panel-activities" class="panel">
+      <div class="card">
+        <div class="card-header">
+          <h2>Journey Activities</h2>
+          <button class="btn btn-primary btn-sm" onclick="showAddActivity()">+ Add Activity</button>
+        </div>
+        <div class="card-body" id="addActivityForm" style="display:none; border-bottom: 1px solid var(--border);">
+          <div class="form-row">
+            <div class="form-group"><label>Profile</label><select id="aProfileId"></select></div>
+            <div class="form-group"><label>Title</label><input id="aTitle" placeholder="Activity title" /></div>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-success btn-sm" onclick="saveActivity()">Save</button>
+            <button class="btn btn-sm" style="background:#eee;" onclick="hideAddActivity()">Cancel</button>
+          </div>
+        </div>
+        <div id="activitiesTable"></div>
+      </div>
+    </div>
+
+    <!-- CHECK-INS -->
+    <div id="panel-checkins" class="panel">
+      <div class="card">
+        <div class="card-header">
+          <h2>Check-ins</h2>
+          <button class="btn btn-primary btn-sm" onclick="showAddCheckin()">+ Add Check-in</button>
+        </div>
+        <div class="card-body" id="addCheckinForm" style="display:none; border-bottom: 1px solid var(--border);">
+          <div class="form-row">
+            <div class="form-group"><label>Activity</label><select id="cActivityId"></select></div>
+            <div class="form-group"><label>Location</label><input id="cLocation" placeholder="Location name" /></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Check-in At</label><input type="datetime-local" id="cCheckIn" /></div>
+            <div class="form-group"><label>Check-out At</label><input type="datetime-local" id="cCheckOut" /></div>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-success btn-sm" onclick="saveCheckin()">Save</button>
+            <button class="btn btn-sm" style="background:#eee;" onclick="hideAddCheckin()">Cancel</button>
+          </div>
+        </div>
+        <div id="checkinsTable"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://jtcfcdqyzmixrsopyjgw.supabase.co';
+let sb;
+
+function doLogin() {
+  const key = document.getElementById('keyInput').value.trim();
+  if (!key) return;
+  sb = supabase.createClient(SUPABASE_URL, key);
+  sb.from('profiles').select('id').limit(1).then(({ error }) => {
+    if (error) { toast('Invalid key or connection failed', 'error'); return; }
+    sessionStorage.setItem('sb_key', key);
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    loadAll();
+  });
+}
+
+// Auto-login if key in session
+(function() {
+  const k = sessionStorage.getItem('sb_key');
+  if (k) { document.getElementById('keyInput').value = k; doLogin(); }
+})();
+
+let profiles = [], activities = [], checkins = [];
+
+async function loadAll() {
+  await loadProfiles();
+  await loadActivities();
+  await loadCheckins();
+}
+
+// ─── PROFILES ───
+async function loadProfiles() {
+  const { data, error } = await sb.from('profiles').select('*').order('id');
+  if (error) { toast(error.message, 'error'); return; }
+  profiles = data || [];
+  renderProfiles();
+}
+
+function renderProfiles() {
+  if (!profiles.length) { document.getElementById('profilesTable').innerHTML = '<div class="empty">No users yet</div>'; return; }
+  let html = '<table><tr><th>ID</th><th>Name</th><th>Member ID</th><th>Phone</th><th>Password</th><th>Actions</th></tr>';
+  profiles.forEach(p => {
+    html += `<tr>
+      <td>${p.id}</td>
+      <td><input value="${esc(p.name)}" onchange="updateProfile(${p.id},'name',this.value)" style="border:1px solid #eee;padding:4px 8px;border-radius:6px;width:100%;" /></td>
+      <td><span class="badge badge-purple">${esc(p.member_id)}</span></td>
+      <td><input value="${esc(p.phone||'')}" onchange="updateProfile(${p.id},'phone',this.value)" style="border:1px solid #eee;padding:4px 8px;border-radius:6px;width:120px;" /></td>
+      <td><input value="${esc(p.password||'')}" onchange="updateProfile(${p.id},'password',this.value)" style="border:1px solid #eee;padding:4px 8px;border-radius:6px;width:100px;" /></td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteProfile(${p.id})">Delete</button></td>
+    </tr>`;
+  });
+  html += '</table>';
+  document.getElementById('profilesTable').innerHTML = html;
+}
+
+function showAddProfile() { document.getElementById('addProfileForm').style.display = 'block'; }
+function hideAddProfile() { document.getElementById('addProfileForm').style.display = 'none'; }
+
+async function saveProfile() {
+  const name = document.getElementById('pName').value.trim();
+  const member_id = document.getElementById('pMemberId').value.trim();
+  const phone = document.getElementById('pPhone').value.trim() || null;
+  const password = document.getElementById('pPassword').value.trim() || null;
+  if (!name || !member_id) { toast('Name and Member ID required', 'error'); return; }
+  const { error } = await sb.from('profiles').insert({ name, member_id, phone, password });
+  if (error) { toast(error.message, 'error'); return; }
+  toast('User added!', 'success');
+  hideAddProfile();
+  ['pName','pMemberId','pPhone','pPassword'].forEach(id => document.getElementById(id).value = '');
+  loadProfiles();
+}
+
+async function updateProfile(id, field, value) {
+  const { error } = await sb.from('profiles').update({ [field]: value || null }).eq('id', id);
+  if (error) toast(error.message, 'error');
+  else toast('Updated', 'success');
+}
+
+async function deleteProfile(id) {
+  if (!confirm('Delete this user and all their activities?')) return;
+  // Delete child rows first
+  const acts = activities.filter(a => a.profile_id === id);
+  for (const a of acts) {
+    await sb.from('journey_check_ins').delete().eq('activity_id', a.id);
+  }
+  await sb.from('journey_activities').delete().eq('profile_id', id);
+  const { error } = await sb.from('profiles').delete().eq('id', id);
+  if (error) { toast(error.message, 'error'); return; }
+  toast('User deleted', 'success');
+  loadAll();
+}
+
+// ─── ACTIVITIES ───
+async function loadActivities() {
+  const { data, error } = await sb.from('journey_activities').select('*, profiles(name)').order('id');
+  if (error) { toast(error.message, 'error'); return; }
+  activities = data || [];
+  renderActivities();
+  populateActivityDropdowns();
+}
+
+function renderActivities() {
+  if (!activities.length) { document.getElementById('activitiesTable').innerHTML = '<div class="empty">No activities yet</div>'; return; }
+  let html = '<table><tr><th>ID</th><th>User</th><th>Title</th><th>Created</th><th>Actions</th></tr>';
+  activities.forEach(a => {
+    const userName = a.profiles ? a.profiles.name : '?';
+    html += `<tr>
+      <td>${a.id}</td>
+      <td><span class="badge badge-green">${esc(userName)}</span></td>
+      <td><input value="${esc(a.title)}" onchange="updateActivity(${a.id},'title',this.value)" style="border:1px solid #eee;padding:4px 8px;border-radius:6px;width:100%;" /></td>
+      <td style="color:var(--text-light);font-size:12px;">${new Date(a.created_at).toLocaleDateString()}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteActivity(${a.id})">Delete</button></td>
+    </tr>`;
+  });
+  html += '</table>';
+  document.getElementById('activitiesTable').innerHTML = html;
+}
+
+function showAddActivity() {
+  populateProfileDropdown();
+  document.getElementById('addActivityForm').style.display = 'block';
+}
+function hideAddActivity() { document.getElementById('addActivityForm').style.display = 'none'; }
+
+function populateProfileDropdown() {
+  const sel = document.getElementById('aProfileId');
+  sel.innerHTML = profiles.map(p => `<option value="${p.id}">${esc(p.name)} (${esc(p.member_id)})</option>`).join('');
+}
+
+async function saveActivity() {
+  const profile_id = parseInt(document.getElementById('aProfileId').value);
+  const title = document.getElementById('aTitle').value.trim();
+  if (!title) { toast('Title required', 'error'); return; }
+  const { error } = await sb.from('journey_activities').insert({ profile_id, title });
+  if (error) { toast(error.message, 'error'); return; }
+  toast('Activity added!', 'success');
+  hideAddActivity();
+  document.getElementById('aTitle').value = '';
+  loadActivities();
+}
+
+async function updateActivity(id, field, value) {
+  const { error } = await sb.from('journey_activities').update({ [field]: value }).eq('id', id);
+  if (error) toast(error.message, 'error');
+  else toast('Updated', 'success');
+}
+
+async function deleteActivity(id) {
+  if (!confirm('Delete this activity and all its check-ins?')) return;
+  await sb.from('journey_check_ins').delete().eq('activity_id', id);
+  const { error } = await sb.from('journey_activities').delete().eq('id', id);
+  if (error) { toast(error.message, 'error'); return; }
+  toast('Activity deleted', 'success');
+  loadAll();
+}
+
+// ─── CHECK-INS ───
+async function loadCheckins() {
+  const { data, error } = await sb.from('journey_check_ins').select('*, journey_activities(title)').order('id', { ascending: false });
+  if (error) { toast(error.message, 'error'); return; }
+  checkins = data || [];
+  renderCheckins();
+}
+
+function renderCheckins() {
+  if (!checkins.length) { document.getElementById('checkinsTable').innerHTML = '<div class="empty">No check-ins yet</div>'; return; }
+  let html = '<table><tr><th>ID</th><th>Activity</th><th>Check-in</th><th>Check-out</th><th>Location</th><th>Actions</th></tr>';
+  checkins.forEach(c => {
+    const actName = c.journey_activities ? c.journey_activities.title : '?';
+    const cin = c.check_in_at ? new Date(c.check_in_at).toLocaleString() : '';
+    const cout = c.check_out_at ? new Date(c.check_out_at).toLocaleString() : '—';
+    html += `<tr>
+      <td>${c.id}</td>
+      <td style="max-width:200px;"><span class="badge badge-purple" style="font-size:10px;">${esc(actName).substring(0,40)}</span></td>
+      <td style="font-size:12px;">${cin}</td>
+      <td style="font-size:12px;">${cout}</td>
+      <td><input value="${esc(c.location||'')}" onchange="updateCheckin(${c.id},'location',this.value)" style="border:1px solid #eee;padding:4px 8px;border-radius:6px;width:120px;" /></td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteCheckin(${c.id})">Delete</button></td>
+    </tr>`;
+  });
+  html += '</table>';
+  document.getElementById('checkinsTable').innerHTML = html;
+}
+
+function populateActivityDropdowns() {
+  const sel = document.getElementById('cActivityId');
+  sel.innerHTML = activities.map(a => `<option value="${a.id}">${esc(a.title).substring(0,50)}</option>`).join('');
+}
+
+function showAddCheckin() {
+  const now = new Date();
+  const local = new Date(now - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  document.getElementById('cCheckIn').value = local;
+  document.getElementById('addCheckinForm').style.display = 'block';
+}
+function hideAddCheckin() { document.getElementById('addCheckinForm').style.display = 'none'; }
+
+async function saveCheckin() {
+  const activity_id = parseInt(document.getElementById('cActivityId').value);
+  const check_in_at = document.getElementById('cCheckIn').value;
+  const check_out_at = document.getElementById('cCheckOut').value || null;
+  const location = document.getElementById('cLocation').value.trim();
+  if (!check_in_at) { toast('Check-in time required', 'error'); return; }
+  const row = { activity_id, check_in_at: new Date(check_in_at).toISOString(), location };
+  if (check_out_at) row.check_out_at = new Date(check_out_at).toISOString();
+  const { error } = await sb.from('journey_check_ins').insert(row);
+  if (error) { toast(error.message, 'error'); return; }
+  toast('Check-in added!', 'success');
+  hideAddCheckin();
+  document.getElementById('cLocation').value = '';
+  document.getElementById('cCheckOut').value = '';
+  loadCheckins();
+}
+
+async function updateCheckin(id, field, value) {
+  const { error } = await sb.from('journey_check_ins').update({ [field]: value || null }).eq('id', id);
+  if (error) toast(error.message, 'error');
+  else toast('Updated', 'success');
+}
+
+async function deleteCheckin(id) {
+  if (!confirm('Delete this check-in?')) return;
+  const { error } = await sb.from('journey_check_ins').delete().eq('id', id);
+  if (error) { toast(error.message, 'error'); return; }
+  toast('Deleted', 'success');
+  loadCheckins();
+}
+
+// ─── UI HELPERS ───
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('panel-' + name).classList.add('active');
+}
+
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast ' + type;
+  el.style.display = 'block';
+  setTimeout(() => { el.style.display = 'none'; }, 2500);
+}
+
+function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+</script>
+</body>
+</html>
