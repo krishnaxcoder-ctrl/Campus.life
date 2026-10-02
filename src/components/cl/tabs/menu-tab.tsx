@@ -18,7 +18,7 @@ export function MenuTab() {
   const logout = () =>
     Alert.alert('Logout', 'Are you sure you want to logout?', [
       { text: 'Cancel', style: 'cancel' },
-      { text: 'Logout', style: 'destructive' },
+      { text: 'Logout', style: 'destructive', onPress: () => router.replace('/login') },
     ]);
 
   const sections: { title: string; rows: Row[] }[] = [
